@@ -13,6 +13,7 @@ import { useContentParsing } from '../../hooks/useContentParsing';
 import { useFileHandlers } from '../../hooks/useFileHandlers';
 import { useLessonActions } from '../../hooks/useLessonActions';
 import { createValidationMessage } from '../../utils/contentValidation';
+import { parseContent } from '../../utils/contentFormat';
 import { FileJson } from 'lucide-react';
 
 interface LessonEditorProps {
@@ -40,7 +41,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
   const { formState, actions } = useLessonFormState(lesson, lessonId, initialData);
   const { media, handleImageFileChange, handleAudioFileChange, handlePasteImageFromClipboard } = useFileHandlers();
   
-  const { liveDetection, isContentValid, isJsonContent, autoSEO } = useContentParsing(
+  const { liveDetection, isContentValid, isJsonContent, autoSEO, autoTitle } = useContentParsing(
     jsonContent,
     formState.title,
     formState.metadata.seo
@@ -68,6 +69,12 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
       actions.setMetadata({ seo: autoSEO });
     }
   }, [autoSEO, formState.metadata.seo, actions]);
+
+  React.useEffect(() => {
+    if (autoTitle && !formState.title) {
+      actions.setTitle(autoTitle);
+    }
+  }, [autoTitle, formState.title, actions]);
 
   React.useEffect(() => {
     if (lesson?.content) {
@@ -98,16 +105,18 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
   };
 
   const handlePasteFromClipboard = async () => {
-    await lessonActions.handlePasteFromClipboard(handleContentChange);
-    const detected = liveDetection;
-    if (detected.format === 'json') {
-      const parsed = detected.value as any;
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        if (parsed.title) {
-          actions.setTitle(parsed.title);
-        }
-        if (parsed.seo_intro && !formState.metadata.seo) {
-          actions.setMetadata({ seo: parsed.seo_intro });
+    const text = await lessonActions.handlePasteFromClipboard(handleContentChange);
+    if (text) {
+      const detected = parseContent(text);
+      if (detected.format === 'json') {
+        const parsed = detected.value as any;
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          if (parsed.title) {
+            actions.setTitle(parsed.title);
+          }
+          if (parsed.seo_intro) {
+            actions.setMetadata({ seo: parsed.seo_intro });
+          }
         }
       }
     }

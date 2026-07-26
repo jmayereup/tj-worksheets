@@ -208,14 +208,17 @@ export const useLessonActions = ({
     }
   }, [jsonContent, formState, lessonId, existingData, onError]);
 
-  const handlePasteFromClipboard = useCallback(async (onContentChange: (content: string) => void) => {
+  const handlePasteFromClipboard = useCallback(async (onContentChange: (content: string) => void): Promise<string | null> => {
     try {
       const text = await navigator.clipboard.readText();
       if (text) {
         onContentChange(text);
+        return text;
       }
+      return null;
     } catch (err) {
       onError(VALIDATION_MESSAGES.CLIPBOARD_PERMISSION_DENIED);
+      return null;
     }
   }, [onError]);
 
