@@ -110,6 +110,11 @@ export const FocusedReaderView: React.FC<FocusedReaderViewProps> = ({
   const handlePageChange = (newIndex: number) => {
     setCurrentPartIndex(newIndex);
     setAnswers(prev => ({ ...prev, focusedReaderPage: newIndex }));
+    setTimeout(() => {
+      if (readingPassageRef.current) {
+        readingPassageRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
   };
 
   const {

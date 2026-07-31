@@ -86,6 +86,11 @@ export const ChapterBookView: React.FC<ChapterBookViewProps> = ({
   const handleChapterChange = (newIndex: number) => {
     setCurrentChapterIndex(newIndex);
     setAnswers(prev => ({ ...prev, focusedReaderPage: newIndex }));
+    setTimeout(() => {
+      if (readingPassageRef.current) {
+        readingPassageRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
   };
 
   const toggleTranslation = () => {
