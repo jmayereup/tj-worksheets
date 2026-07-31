@@ -12,7 +12,7 @@ const SERVER_USER = process.env.DEPLOY_SERVER_USER || 'root';
 const REMOTE_HOOKS_PATH = process.env.POCKETBASE_HOOKS_PATH || '/opt/pocketbase/pb_hooks';
 const SERVICE_NAME = process.env.DEPLOY_PB_SERVICE || 'pocketbase.service';
 const HOOK_FILE = 'worksheets-deploy.pb.js';
-const HELPER_FILES = ['cloudflare-rebuild.js'];
+const HELPER_FILES = ['worksheets-cloudflare-rebuild.js'];
 
 const LOCAL_HOOK = join(projectRoot, 'pb_hooks', HOOK_FILE);
 

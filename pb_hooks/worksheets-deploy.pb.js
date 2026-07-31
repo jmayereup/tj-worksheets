@@ -7,19 +7,19 @@
 // ext-jsvm-scope.md).
 
 onRecordAfterCreateSuccess(function (e) {
-    const triggerCloudflareRebuild = require(`${__hooks}/cloudflare-rebuild.js`);
+    const triggerCloudflareRebuild = require(`${__hooks}/worksheets-cloudflare-rebuild.js`);
     triggerCloudflareRebuild($app.logger(), "worksheets", e.record.id);
     e.next();
 }, "worksheets");
 
 onRecordAfterUpdateSuccess(function (e) {
-    const triggerCloudflareRebuild = require(`${__hooks}/cloudflare-rebuild.js`);
+    const triggerCloudflareRebuild = require(`${__hooks}/worksheets-cloudflare-rebuild.js`);
     triggerCloudflareRebuild($app.logger(), "worksheets", e.record.id);
     e.next();
 }, "worksheets");
 
 onRecordAfterDeleteSuccess(function (e) {
-    const triggerCloudflareRebuild = require(`${__hooks}/cloudflare-rebuild.js`);
+    const triggerCloudflareRebuild = require(`${__hooks}/worksheets-cloudflare-rebuild.js`);
     triggerCloudflareRebuild($app.logger(), "worksheets", e.record.id);
     e.next();
 }, "worksheets");
