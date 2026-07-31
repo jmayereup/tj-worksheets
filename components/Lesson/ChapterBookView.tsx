@@ -252,6 +252,16 @@ export const ChapterBookView: React.FC<ChapterBookViewProps> = ({
                         }
                     }));
                 }}
+                onNextPage={() => {
+                  if (currentChapterIndex < content.chapters.length - 1) {
+                    handleChapterChange(currentChapterIndex + 1);
+                  } else {
+                    const el = document.querySelector('.tj-lesson-footer') || document.querySelector('footer');
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }
+                }}
               />
             </CollapsibleActivity>
           </section>

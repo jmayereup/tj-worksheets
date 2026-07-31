@@ -254,6 +254,16 @@ export const FocusedReaderView: React.FC<FocusedReaderViewProps> = ({
                 title={`Page ${currentPart.part_number} Questions`}
                 showReferenceText={false}
                 savedIsCompleted={isComprehensionCompleted}
+                onNextPage={() => {
+                  if (currentPartIndex < content.parts.length - 1) {
+                    handlePageChange(currentPartIndex + 1);
+                  } else {
+                    const el = document.querySelector('.tj-lesson-footer') || document.querySelector('footer');
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }
+                }}
               />
             </CollapsibleActivity>
           </section>

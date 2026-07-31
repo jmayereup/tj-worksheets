@@ -58,28 +58,13 @@ export const CollapsibleActivity: React.FC<CollapsibleActivityProps> = ({
       return;
     }
 
-    // If completed but not a perfect score, keep it open so they see their mistakes
-    if (isCompleted && score !== undefined && !isPerfectScore) {
-      setIsCollapsed(false);
-      return;
-    }
-
     if (isCompleted && isPerfectScore && !hasPlayedFanfare.current) {
       hasPlayedFanfare.current = true;
       playFanfare();
-      
-      // Brief delay to let the fanfare start before collapsing
-      // Increased to 3s to give student time to see the "Activity Completed" screen
-      const timer = setTimeout(() => {
-        if (containerRef.current) {
-          lastHeightRef.current = containerRef.current.offsetHeight;
-          isAdjustingRef.current = true;
-        }
-        setIsCollapsed(true);
-      }, 3000);
-
-      return () => clearTimeout(timer);
     }
+
+    // Keep collapse box open on completion
+    setIsCollapsed(false);
   }, [isCompleted, isPerfectScore]);
 
   // Handle scroll compensation to prevent "jerking" when height changes above viewport
