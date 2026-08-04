@@ -169,14 +169,18 @@ ${embedData}
   }
 
   // 3. Wrap it in a clean article wrapper that matches standard styling and links the stylesheet
+  // Components that internally render their own header (such as tj-pocketbase-worksheet and tj-chapter-book)
+  // do not need an external static header to avoid duplicate headers.
+  const isSelfHeaderComponent = !componentConfig || componentConfig.tag === 'tj-chapter-book' || componentConfig.tag === 'tj-pocketbase-worksheet';
+  const headerHtml = isSelfHeaderComponent ? '' : `\n  <header class="tj-worksheet-header mb-6 text-center">
+    <h1 class="text-3xl font-black text-green-900 tracking-tight mb-2">${escapeHtml(title)}</h1>
+    ${description ? `<p class="text-sm text-gray-500 font-medium italic mt-1">${escapeHtml(description)}</p>` : ''}
+  </header>`;
+
   return `<!-- TJ Language Learning Worksheet (Pre-compiled) -->
 <link rel="stylesheet" href="https://worksheets.teacherjake.com/wc/language-learning-worksheets.css">
 
-<article class="tj-worksheet-compiled prose mx-auto p-4 sm:p-6">
-  <header class="tj-worksheet-header mb-6 text-center">
-    <h1 class="text-3xl font-black text-green-900 tracking-tight mb-2">${escapeHtml(title)}</h1>
-    ${description ? `<p class="text-sm text-gray-500 font-medium italic mt-1">${escapeHtml(description)}</p>` : ''}
-  </header>
+<article class="tj-worksheet-compiled prose mx-auto p-4 sm:p-6">${headerHtml}
   
   <div class="tj-worksheet-body">
     ${bodyHtml}
