@@ -19,6 +19,7 @@ interface Props {
   title?: string;
   showReferenceText?: boolean;
   shuffleQuestions?: boolean;
+  onNextPage?: () => void;
 }
 
 export const Comprehension: React.FC<Props> = ({
@@ -33,7 +34,8 @@ export const Comprehension: React.FC<Props> = ({
   lessonId,
   title = "Reading Questions",
   showReferenceText = true,
-  shuffleQuestions = true
+  shuffleQuestions = true,
+  onNextPage
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isChecked, setIsChecked] = useState(false);
@@ -123,9 +125,19 @@ export const Comprehension: React.FC<Props> = ({
           {score === data.questions.length ? '🎉 Perfect!' : ''}
         </div>
         <p className="text-gray-600 text-lg mb-6 font-medium">You got {score} out of {data.questions.length} correct.</p>
-        <Button onClick={handleRetry} variant="secondary" className="px-8 py-3 rounded-full font-bold">
-          <RefreshCw className="w-5 h-5 mr-2" /> Retry Activity
-        </Button>
+        <div className="flex flex-wrap items-center justify-center gap-4">
+          <Button onClick={handleRetry} variant="secondary" className="px-8 py-3 rounded-full font-bold">
+            <RefreshCw className="w-5 h-5 mr-2" /> Retry Activity
+          </Button>
+          {onNextPage && (
+            <Button onClick={onNextPage} variant="primary" className="px-8 py-3 rounded-full font-bold shadow-md hover:shadow-lg transition-all">
+              <div className="flex items-center justify-center gap-2">
+                <span>Next</span>
+                <ChevronRight className="w-5 h-5" />
+              </div>
+            </Button>
+          )}
+        </div>
       </section>
     );
   }

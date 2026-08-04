@@ -257,6 +257,7 @@ export const ReadingPassage: React.FC<ReadingPassageProps> = ({
 
   return (
     <section 
+      ref={passageRef}
       className={`bg-white p-1 sm:p-2 rounded-xl sm:shadow-sm sm:border sm:border-gray-100 mb-2 relative ${className}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
@@ -319,7 +320,6 @@ export const ReadingPassage: React.FC<ReadingPassageProps> = ({
 
       <div className="mx-0">
         <div
-          ref={passageRef}
           className="max-w-none justify-baseline text-lg leading-8 text-gray-800 bg-transparent whitespace-pre-wrap select-text"
           translate="no"
         >

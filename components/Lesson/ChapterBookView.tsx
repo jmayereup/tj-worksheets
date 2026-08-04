@@ -86,6 +86,11 @@ export const ChapterBookView: React.FC<ChapterBookViewProps> = ({
   const handleChapterChange = (newIndex: number) => {
     setCurrentChapterIndex(newIndex);
     setAnswers(prev => ({ ...prev, focusedReaderPage: newIndex }));
+    setTimeout(() => {
+      if (readingPassageRef.current) {
+        readingPassageRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
   };
 
   const toggleTranslation = () => {
@@ -251,6 +256,16 @@ export const ChapterBookView: React.FC<ChapterBookViewProps> = ({
                             [`chapter_${currentChapterIndex}`]: completed
                         }
                     }));
+                }}
+                onNextPage={() => {
+                  if (currentChapterIndex < content.chapters.length - 1) {
+                    handleChapterChange(currentChapterIndex + 1);
+                  } else {
+                    const el = document.querySelector('.tj-lesson-footer') || document.querySelector('footer');
+                    if (el) {
+                      el.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }
                 }}
               />
             </CollapsibleActivity>
