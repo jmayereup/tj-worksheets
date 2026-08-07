@@ -403,9 +403,6 @@ export const createLesson = async (data: any) => {
     console.error('Failed to compile and save HTML block on create:', err);
   }
 
-  // Trigger Cloudflare Pages rebuild
-  triggerCloudflareRebuild();
-
   return record;
 };
 
@@ -444,14 +441,9 @@ export const updateLesson = async (id: string, data: any) => {
     console.error('Failed to compile and save HTML block on update:', err);
   }
 
-  // Trigger Cloudflare Pages rebuild
-  triggerCloudflareRebuild();
-
   return record;
 };
 
 export const deleteLesson = async (id: string) => {
-  const res = await pb.collection('worksheets').delete(id);
-  triggerCloudflareRebuild();
-  return res;
+  return await pb.collection('worksheets').delete(id);
 };

@@ -4,7 +4,8 @@ import { LessonList } from './LessonList';
 import { LessonEditor } from './LessonEditorRefactored';
 import { isAdmin, triggerCloudflareRebuild } from '../../services/pocketbase';
 import { Button } from '../UI/Button';
-import { LayoutDashboard, ArrowLeft, Plus, RefreshCw } from 'lucide-react';
+import { Modal } from '../UI/Modal';
+import { LayoutDashboard, ArrowLeft, Plus, RefreshCw, Rocket } from 'lucide-react';
 
 interface AdminDashboardProps {
     onBack: () => void;
@@ -19,6 +20,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack, onPrevie
     const [editorInitData, setEditorInitData] = useState<any>(null);
     const [isRebuilding, setIsRebuilding] = useState(false);
     const [rebuildStatus, setRebuildStatus] = useState<string | null>(null);
+    const [showRebuildPrompt, setShowRebuildPrompt] = useState(false);
 
     const handleLoginSuccess = () => {
         setIsLoggedIn(true);
@@ -55,6 +57,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack, onPrevie
         setEditingLessonId(null);
         setEditorInitData(null);
         setAdminView('list');
+    };
+
+    const handleSaveLesson = () => {
+        handleBackToList();
+        setShowRebuildPrompt(true);
     };
 
     const handleManualRebuild = async () => {
@@ -135,13 +142,53 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack, onPrevie
                     <LessonEditor 
                         lessonId={editingLessonId} 
                         initialData={editorInitData}
-                        onSave={handleBackToList} 
+                        onSave={handleSaveLesson} 
                         onCancel={handleBackToList} 
                         onPreview={onPreview}
                     />
                 )}
             </main>
+
+            <Modal
+                isOpen={showRebuildPrompt}
+                onClose={() => setShowRebuildPrompt(false)}
+                title="Worksheet Saved"
+                maxWidth="max-w-md"
+            >
+                <div className="p-6 text-center space-y-6">
+                    <div className="mx-auto w-14 h-14 bg-green-100 rounded-2xl flex items-center justify-center text-green-600">
+                        <Rocket className="w-8 h-8" />
+                    </div>
+                    <div>
+                        <h3 className="text-lg font-bold text-gray-900 mb-2">Rebuild your blog now?</h3>
+                        <p className="text-sm text-gray-600">
+                            Your worksheet changes have been saved to PocketBase. Would you like to trigger a blog build on Cloudflare to publish your updates?
+                        </p>
+                    </div>
+                    <div className="flex gap-3 justify-center pt-2">
+                        <Button 
+                            variant="outline" 
+                            onClick={() => setShowRebuildPrompt(false)}
+                            className="px-5"
+                        >
+                            Later
+                        </Button>
+                        <Button 
+                            onClick={async () => {
+                                setShowRebuildPrompt(false);
+                                await handleManualRebuild();
+                            }}
+                            disabled={isRebuilding}
+                            className="items-center gap-2 px-6"
+                        >
+                            <RefreshCw className={`w-4 h-4 ${isRebuilding ? 'animate-spin' : ''}`} />
+                            Rebuild Blog Now
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 };
+
 
