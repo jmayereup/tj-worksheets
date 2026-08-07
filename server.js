@@ -91,11 +91,8 @@ router.post('/api/rebuild', async (req, res) => {
     return res.status(401).json({ ok: false, error: 'Missing Authorization header' });
   }
 
-  const webhookUrl = process.env.CLOUDFLARE_DEPLOY_HOOK_URL;
-  if (!webhookUrl) {
-    console.error('CLOUDFLARE_DEPLOY_HOOK_URL is not set');
-    return res.status(500).json({ ok: false, error: 'CLOUDFLARE_DEPLOY_HOOK_URL is not configured' });
-  }
+  const webhookUrl = process.env.CLOUDFLARE_DEPLOY_HOOK_URL || 'https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/9bcde703-70bb-4046-8794-fed92562fe0c';
+
 
   try {
     const refreshRes = await fetch(`${PB_URL}/api/collections/_superusers/auth-refresh`, {
