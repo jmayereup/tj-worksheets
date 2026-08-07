@@ -371,13 +371,12 @@ The `quiz-element` raw-string special case was removed — the new rules apply u
 
 This repo does **not** deploy itself. The flow is:
 
-1. **PocketBase hooks** (`pb_hooks/*.js`) — installed on the PB server. After any create/update/delete on the `worksheets` collection, they POST to a Cloudflare Pages deploy hook
-2. **Cloudflare Pages** — rebuilds the static site from the latest `dist/` (you commit dist? No — see "Manual deploy" below)
+1. **Frontend App (`services/pocketbase.ts`)** — whenever an admin creates, updates, or deletes a worksheet (or clicks "Rebuild Blog" in the admin dashboard), `triggerCloudflareRebuild()` POSTs to the Cloudflare Pages deploy hook (`https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/9bcde703-70bb-4046-8794-fed92562fe0c`)
+2. **Cloudflare Pages** — rebuilds the static site from the latest repository build
 3. **Express server** (`server.js`) — wraps the built React app with dynamic OG tags for shared lesson links, and exposes `/api/rebuild` (auth via `_superusers` token) which forwards to the same Cloudflare deploy hook
 
 > ⚠️ Per `.agents/rules/rule_deploy.md`: **never deploy on your own** — ask the user.
 
-The PB JSVM hooks are **not** compiled; they're loaded as JS. They use `require()` (CommonJS) to share `worksheets-cloudflare-rebuild.js`. The rules in `.agents/skills/pocketbase-best-practices/references/server-side-extending.md` apply — most importantly, the JSVM scope rule: each handler is serialized and executed in isolation, so module-scope state from a `require()`'d file is fine, but capturing variables outside the handler in the hook file itself does **not** work.
 
 ## 11. External embed (third-party sites)
 

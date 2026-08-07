@@ -2,6 +2,7 @@ import PocketBase from 'pocketbase';
 import { LessonRecord, ParsedLesson, LessonContent } from '../types';
 import { compileLessonHtml } from '../utils/htmlCompiler';
 import { normalizeContent } from '../utils/contentFormat';
+import { config } from '../config';
 
 // Initialize PocketBase
 // Note: We use the URL provided in the original application
@@ -346,7 +347,22 @@ const hasPreComputedHtmlCompiled = (data: any): boolean => {
   return Object.prototype.hasOwnProperty.call(data, 'htmlCompiled');
 };
 
+// Trigger Cloudflare Pages deploy hook for blog updates
+export const triggerCloudflareRebuild = async (): Promise<boolean> => {
+  try {
+    const url = config.deployHookUrl;
+    if (!url) return false;
+    await fetch(url, { method: 'POST', mode: 'no-cors' });
+    console.log('Triggered Cloudflare rebuild deploy hook');
+    return true;
+  } catch (err) {
+    console.error('Failed to trigger Cloudflare rebuild deploy hook:', err);
+    return false;
+  }
+};
+
 // CRUD methods
+
 export const createLesson = async (data: any) => {
   const user = getCurrentUser();
   let record: any;

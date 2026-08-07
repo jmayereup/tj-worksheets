@@ -10,8 +10,7 @@
     "build:app": "vite build",
     "build:wc": "VITE_WC=true vite build",
     "preview": "vite preview",
-    "start": "node server.js",
-    "deploy:hook": "node scripts/deploy-hook.js"
+    "start": "node server.js"
   },
   "homepage": ".",
   "dependencies": {

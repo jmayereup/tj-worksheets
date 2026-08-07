@@ -140,11 +140,11 @@ const App: React.FC = () => {
         } else if (newView === 'admin') {
             setSelectedLessonId(null);
             setCurrentLesson(null);
-            updateURL({ lesson: '', view: '' });
+            updateURL({ lesson: '', view: 'admin' });
         } else if (newView === 'create') {
             setSelectedLessonId(null);
             setCurrentLesson(null);
-            updateURL({ lesson: '', view: '' });
+            updateURL({ lesson: '', view: 'create' });
         }
     };
 
@@ -185,42 +185,40 @@ const App: React.FC = () => {
                             <span className="hidden md:block font-bold text-gray-700">Worksheets</span>
                         </div>
 
-                        {isLoggedIn && (
-                            <div className="flex items-center gap-1 sm:gap-2 ml-4">
-                                <button
-                                    onClick={() => handleViewChange('home')}
-                                    className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-all ${
-                                        (view === 'home' || view === 'lesson')
-                                            ? 'text-green-700 bg-green-50 border border-green-150 shadow-sm'
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-transparent'
-                                    }`}
-                                >
-                                    Library
-                                </button>
-                                <button
-                                    onClick={() => handleViewChange('admin')}
-                                    title="Manage live worksheets in the online library"
-                                    className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-all ${
-                                        view === 'admin'
-                                            ? 'text-green-700 bg-green-50 border border-green-150 shadow-sm'
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-transparent'
-                                    }`}
-                                >
-                                    Admin
-                                </button>
-                                <button
-                                    onClick={() => handleViewChange('create')}
-                                    title="Generate standalone HTML files for offline/personal use"
-                                    className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-all ${
-                                        view === 'create'
-                                            ? 'text-green-700 bg-green-50 border border-green-150 shadow-sm'
-                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-transparent'
-                                    }`}
-                                >
-                                    Create
-                                </button>
-                            </div>
-                        )}
+                        <div className="flex items-center gap-1 sm:gap-2 ml-4">
+                            <button
+                                onClick={() => handleViewChange('home')}
+                                className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-all ${
+                                    (view === 'home' || view === 'lesson')
+                                        ? 'text-green-700 bg-green-50 border border-green-150 shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-transparent'
+                                }`}
+                            >
+                                Library
+                            </button>
+                            <button
+                                onClick={() => handleViewChange('admin')}
+                                title="Manage live worksheets in the online library"
+                                className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-all ${
+                                    view === 'admin'
+                                        ? 'text-green-700 bg-green-50 border border-green-150 shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-transparent'
+                                }`}
+                            >
+                                Admin
+                            </button>
+                            <button
+                                onClick={() => handleViewChange('create')}
+                                title="Generate standalone HTML files for offline/personal use"
+                                className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-all ${
+                                    view === 'create'
+                                        ? 'text-green-700 bg-green-50 border border-green-150 shadow-sm'
+                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-transparent'
+                                }`}
+                            >
+                                Create
+                            </button>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -303,7 +301,20 @@ const App: React.FC = () => {
             </nav>
 
             <main className="container mx-auto px-0 py-4 print:p-0 print:m-0 print:max-w-none">
-                {!isLoggedIn ? (
+                {view === 'create' ? (
+                    <div className="max-w-6xl mx-auto px-4 sm:px-6">
+                        <LessonEditor 
+                            lessonId={null} 
+                            isPublicCreator={true}
+                            onSave={() => handleViewChange('home')} 
+                            onCancel={() => handleViewChange('home')} 
+                            onPreview={(lesson) => {
+                                setCurrentLesson(lesson);
+                                setShowPreview(true);
+                            }}
+                        />
+                    </div>
+                ) : !isLoggedIn ? (
                     <div className="py-12 px-4">
                         <div className="max-w-md mx-auto bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 rounded-r-xl shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
                             <div className="flex items-start gap-3">
@@ -500,19 +511,6 @@ const App: React.FC = () => {
                         }}
                         onLogout={handleLogout}
                     />
-                ) : view === 'create' ? (
-                    <div className="max-w-6xl mx-auto px-4 sm:px-6">
-                        <LessonEditor 
-                            lessonId={null} 
-                            isPublicCreator={true}
-                            onSave={() => handleViewChange('home')} 
-                            onCancel={() => handleViewChange('home')} 
-                            onPreview={(lesson) => {
-                                setCurrentLesson(lesson);
-                                setShowPreview(true);
-                            }}
-                        />
-                    </div>
                 ) : (
                     currentLesson && <LessonView lesson={currentLesson} />
                 )}
