@@ -8,7 +8,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Connection details from services/pocketbase.ts
-const PB_URL = process.env.POCKETBASE_URL || 'https://blog.teacherjake.com';
+const PB_URL = process.env.POCKETBASE_URL || process.env.PUBLIC_POCKETBASE_URL || process.env.VITE_POCKETBASE_URL || 'https://pb.teacherjake.com';
 const pb = new PocketBase(PB_URL);
 
 async function authenticate() {

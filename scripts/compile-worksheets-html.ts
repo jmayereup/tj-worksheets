@@ -4,7 +4,7 @@ import readline from 'readline';
 import { compileLessonHtml } from '../utils/htmlCompiler';
 import { normalizeContent } from '../utils/contentFormat';
 
-const PB_URL = process.env.POCKETBASE_URL || 'https://blog.teacherjake.com';
+const PB_URL = process.env.POCKETBASE_URL || process.env.PUBLIC_POCKETBASE_URL || process.env.VITE_POCKETBASE_URL || 'https://pb.teacherjake.com';
 const FILES_BASE_URL = process.env.FILES_BASE_URL || 'https://files.teacherjake.com';
 
 const pb = new PocketBase(PB_URL);

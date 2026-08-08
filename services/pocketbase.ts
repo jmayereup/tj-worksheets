@@ -6,7 +6,7 @@ import { config } from '../config';
 
 // Initialize PocketBase
 // Note: We use the URL provided in the original application
-const PB_URL = (typeof process !== 'undefined' && process.env?.POCKETBASE_URL) || 'https://blog.teacherjake.com';
+const PB_URL = (typeof process !== 'undefined' && (process.env?.POCKETBASE_URL || process.env?.PUBLIC_POCKETBASE_URL || process.env?.VITE_POCKETBASE_URL)) || 'https://pb.teacherjake.com';
 const FILES_BASE_URL = (typeof process !== 'undefined' && process.env?.FILES_BASE_URL) || 'https://files.teacherjake.com';
 
 const createPB = () => {

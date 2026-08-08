@@ -7,7 +7,7 @@ import readline from 'readline';
  * Target ID: hauvrgcm22u94dc
  */
 
-const PB_URL = process.env.POCKETBASE_URL || 'https://blog.teacherjake.com';
+const PB_URL = process.env.POCKETBASE_URL || process.env.PUBLIC_POCKETBASE_URL || process.env.VITE_POCKETBASE_URL || 'https://pb.teacherjake.com';
 const TARGET_CREATOR_ID = 'kjksljovpk623jy';
 
 const pb = new PocketBase(PB_URL);

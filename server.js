@@ -5,8 +5,8 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const PORT = process.env.PORT || 3000;
-const PB_URL = process.env.POCKETBASE_URL || 'https://blog.teacherjake.com';
+const PORT = process.env.PORT || 5173;
+const PB_URL = process.env.POCKETBASE_URL || process.env.PUBLIC_POCKETBASE_URL || process.env.VITE_POCKETBASE_URL || 'https://pb.teacherjake.com';
 const FILES_BASE_URL = process.env.FILES_BASE_URL || 'https://files.teacherjake.com';
 // Base path where the app is served (e.g. '/worksheets' on blog.teacherjake.com)
 const BASE_PATH = process.env.BASE_PATH || '/worksheets';
