@@ -258,6 +258,7 @@ export type WorksheetsRecord<Tcontent = unknown, TcustomConfig = any> = {
 	id: string
 	image?: FileNameString
 	isVideoLesson?: boolean
+	notForBlog?: boolean
 	language?: WorksheetsLanguageOptions
 	lessonType: WorksheetsLessonTypeOptions
 	level?: WorksheetsLevelOptions

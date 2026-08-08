@@ -163,6 +163,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
             lessonType={formState.lessonType}
             testMode={formState.metadata.testMode}
             isVideoLesson={formState.isVideoLesson}
+            notForBlog={formState.notForBlog}
             isPublicCreator={isPublicCreator}
             media={media}
             existingAudioFile={lesson?.audioFile}
@@ -171,6 +172,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
             onTeacherCodeChange={(code) => actions.setMetadata({ teacherCode: code })}
             onTestModeChange={(enabled) => actions.setMetadata({ testMode: enabled })}
             onIsVideoLessonChange={actions.setIsVideoLesson}
+            onNotForBlogChange={actions.setNotForBlog}
             onImageFileChange={handleImageFileChange}
             onAudioFileChange={handleAudioFileChange}
             onPasteImageFromClipboard={handlePasteImageFromClipboard}

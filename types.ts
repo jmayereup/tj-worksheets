@@ -282,6 +282,7 @@ export interface LessonRecord {
   image: string;
   videoUrl: string;
   isVideoLesson: boolean;
+  notForBlog?: boolean;
   lessonType: WorksheetsLessonTypeOptions;
   title?: string;
   tags?: WorksheetsTagsOptions[];

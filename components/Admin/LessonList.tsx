@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { getCurrentUser, fetchLessonById } from '../../services/pocketbase';
 import { usePaginatedLessons, useDeleteLesson } from '../../hooks/useLessons';
 import { Button } from '../UI/Button';
-import { Edit, Trash2, ExternalLink, RefreshCw, Layers, Globe, Calendar, Eye, Search, FileText, CheckSquare, Square, Rocket, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
+import { Edit, Trash2, ExternalLink, RefreshCw, Layers, Globe, Calendar, Eye, EyeOff, Search, FileText, CheckSquare, Square, Rocket, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { extractVocabularyFromLessons } from '../../utils/vocabularyExtractor';
 import { LANGUAGE_OPTIONS, LESSON_TYPE_OPTIONS } from '../../types';
 
@@ -299,6 +299,11 @@ export const LessonList: React.FC<LessonListProps> = ({ onEdit, onPreview, onAdd
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-green-50 text-green-700 text-[10px] font-black border border-green-100 uppercase">
                                             <FileText className="w-3 h-3" /> {lesson.lessonType?.replace('-', ' ')}
                                         </span>
+                                        {lesson.notForBlog && (
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-black border border-amber-100 uppercase" title="Excluded from blog">
+                                                <EyeOff className="w-3 h-3" /> Not For Blog
+                                            </span>
+                                        )}
                                     </div>
                                 </td>
                                 <td className="px-6 py-5">

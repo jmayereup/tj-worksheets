@@ -34,6 +34,7 @@ export interface LessonFormState {
   selectedTags: string[];
   videoUrl: string;
   isVideoLesson: boolean;
+  notForBlog: boolean;
   lessonType: string;
   media: MediaState;
   metadata: MetadataState;
@@ -47,6 +48,7 @@ export interface LessonFormActions {
   setSelectedTags: (tags: string[]) => void;
   setVideoUrl: (url: string) => void;
   setIsVideoLesson: (isVideo: boolean) => void;
+  setNotForBlog: (notForBlog: boolean) => void;
   setLessonType: (type: string) => void;
   setMedia: (media: Partial<MediaState>) => void;
   setMetadata: (metadata: Partial<MetadataState>) => void;
@@ -69,6 +71,7 @@ export interface LessonObjectData {
   tags: string[];
   videoUrl: string;
   isVideoLesson: boolean;
+  notForBlog?: boolean;
   lessonType: string;
   seo: string;
   html: string;

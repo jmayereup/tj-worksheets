@@ -62,6 +62,7 @@ export const buildLessonObject = (
     tags: formState.selectedTags,
     videoUrl: formState.videoUrl,
     isVideoLesson: formState.isVideoLesson,
+    notForBlog: formState.notForBlog,
     lessonType: formState.lessonType,
     seo: formState.seo,
     html: formState.html,
@@ -89,6 +90,7 @@ export const generateFormData = (
   lesson.tags.forEach(tag => formData.append('tags', tag));
   formData.append('videoUrl', lesson.videoUrl);
   formData.append('isVideoLesson', String(lesson.isVideoLesson));
+  formData.append('notForBlog', String(!!lesson.notForBlog));
   formData.append('lessonType', lesson.lessonType);
   formData.append('seo', lesson.seo);
   formData.append('html', lesson.html);

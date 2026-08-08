@@ -29,6 +29,7 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [videoUrl, setVideoUrl] = useState('');
   const [isVideoLesson, setIsVideoLesson] = useState(false);
+  const [notForBlog, setNotForBlog] = useState(false);
   const [lessonType, setLessonType] = useState('');
   
   const [media, setMediaState] = useState<MediaState>(initialMediaState);
@@ -55,6 +56,7 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
       setSelectedTags(lesson.tags || []);
       setVideoUrl(lesson.videoUrl || '');
       setIsVideoLesson(lesson.isVideoLesson || false);
+      setNotForBlog(lesson.notForBlog || false);
       setLessonType(lesson.lessonType || 'worksheet');
       
       setMetadata({
@@ -80,6 +82,7 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
         try {
           setTitle(initialData.title || '');
           setLessonType(initialData.lessonType || '');
+          setNotForBlog(initialData.notForBlog || false);
           
           setMetadata({
             seo: initialData.seo || '',
@@ -104,6 +107,7 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
         setSelectedTags([]);
         setVideoUrl('');
         setIsVideoLesson(false);
+        setNotForBlog(false);
         setMetadata(initialMetadataState);
         setMedia(initialMediaState);
       }
@@ -117,6 +121,7 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
     setSelectedTags([]);
     setVideoUrl('');
     setIsVideoLesson(false);
+    setNotForBlog(false);
     setLessonType('');
     setMetadata(initialMetadataState);
     setMedia(initialMediaState);
@@ -130,6 +135,7 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
     selectedTags,
     videoUrl,
     isVideoLesson,
+    notForBlog,
     lessonType,
     media,
     metadata,
@@ -143,6 +149,7 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
     setSelectedTags,
     setVideoUrl,
     setIsVideoLesson,
+    setNotForBlog,
     setLessonType,
     setMedia,
     setMetadata,

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Video, ImageIcon, Music, ClipboardPaste, Info } from 'lucide-react';
+import { Video, ImageIcon, Music, ClipboardPaste, Info, EyeOff } from 'lucide-react';
 import { Button } from '../../UI/Button';
 import { MediaState } from '../../../types/lessonEditor';
 
@@ -9,6 +9,7 @@ interface MediaSectionProps {
   lessonType: string;
   testMode: boolean;
   isVideoLesson: boolean;
+  notForBlog?: boolean;
   isPublicCreator: boolean;
   media: MediaState;
   existingAudioFile?: string;
@@ -17,6 +18,7 @@ interface MediaSectionProps {
   onTeacherCodeChange: (code: string) => void;
   onTestModeChange: (enabled: boolean) => void;
   onIsVideoLessonChange: (isVideo: boolean) => void;
+  onNotForBlogChange?: (notForBlog: boolean) => void;
   onImageFileChange: (file: File | null) => void;
   onAudioFileChange: (file: File | null) => void;
   onPasteImageFromClipboard: () => void;
@@ -29,6 +31,7 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
   lessonType,
   testMode,
   isVideoLesson,
+  notForBlog = false,
   isPublicCreator,
   media,
   existingAudioFile,
@@ -37,6 +40,7 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
   onTeacherCodeChange,
   onTestModeChange,
   onIsVideoLessonChange,
+  onNotForBlogChange,
   onImageFileChange,
   onAudioFileChange,
   onPasteImageFromClipboard,
@@ -204,19 +208,36 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
         </>
       )}
 
-      <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
-        <div className="flex items-center h-5">
-          <input
-            type="checkbox"
-            id="isVideoLesson"
-            checked={isVideoLesson}
-            onChange={(e) => onIsVideoLessonChange(e.target.checked)}
-            className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer"
-          />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <div className="flex items-center h-5">
+            <input
+              type="checkbox"
+              id="isVideoLesson"
+              checked={isVideoLesson}
+              onChange={(e) => onIsVideoLessonChange(e.target.checked)}
+              className="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer"
+            />
+          </div>
+          <label htmlFor="isVideoLesson" className="text-sm font-bold text-gray-700 cursor-pointer flex items-center gap-2">
+            <Info className="w-4 h-4 text-blue-500" /> Mark as Video Lesson
+          </label>
         </div>
-        <label htmlFor="isVideoLesson" className="text-sm font-bold text-gray-700 cursor-pointer flex items-center gap-2">
-          <Info className="w-4 h-4 text-blue-500" /> Mark as Video Lesson
-        </label>
+
+        <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <div className="flex items-center h-5">
+            <input
+              type="checkbox"
+              id="notForBlog"
+              checked={notForBlog}
+              onChange={(e) => onNotForBlogChange && onNotForBlogChange(e.target.checked)}
+              className="w-5 h-5 text-amber-600 border-gray-300 rounded focus:ring-amber-500 cursor-pointer"
+            />
+          </div>
+          <label htmlFor="notForBlog" className="text-sm font-bold text-gray-700 cursor-pointer flex items-center gap-2">
+            <EyeOff className="w-4 h-4 text-amber-500" /> Exclude from Blog
+          </label>
+        </div>
       </div>
     </div>
   );
