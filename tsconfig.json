@@ -28,6 +28,9 @@
     "noEmit": true
   },
   "exclude": [
-    "pb_hooks"
+    "pb_hooks",
+    "node_modules",
+    "dist",
+    ".git"
   ]
 }
