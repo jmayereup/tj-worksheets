@@ -20,13 +20,19 @@ const App: React.FC = () => {
     const [showPreview, setShowPreview] = useState(false);
     const [showProfileDropdown, setShowProfileDropdown] = useState(false);
 
+    const [hideNav, setHideNav] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        const params = new URLSearchParams(window.location.search);
+        return params.get('hidenav') === '1' || params.get('hidenav') === 'true' || params.get('hideNav') === '1' || params.get('hideNav') === 'true';
+    });
+
     // Filter States
     const [language, setLanguage] = useState('English');
     const [level, setLevel] = useState('All');
     const [tag, setTag] = useState('All');
 
     const { data: lessons = [], isLoading: loading } = useLessons(language, level, isLoggedIn);
-    const { data: currentLessonFromQuery, isLoading: loadingLesson } = useLesson(selectedLessonId, isLoggedIn);
+    const { data: currentLessonFromQuery, isLoading: loadingLesson } = useLesson(selectedLessonId);
 
     // On mount, refresh the auth token to confirm the current user still has
     // isAdmin=true. Catches stale tokens (logged in before the flag was set)
@@ -71,6 +77,9 @@ const App: React.FC = () => {
             const urlLang = params.get('language');
             const urlLevel = params.get('level');
             const urlTag = params.get('category');
+            const hideNavParam = params.get('hidenav') === '1' || params.get('hidenav') === 'true' || params.get('hideNav') === '1' || params.get('hideNav') === 'true';
+
+            setHideNav(hideNavParam);
 
             if (urlLang) setLanguage(urlLang);
             if (urlLevel) setLevel(urlLevel);
@@ -172,90 +181,100 @@ const App: React.FC = () => {
     return (
         <div className="tj-worksheet-wrapper tj-printable-worksheet min-h-screen font-sans print:min-h-0 print:bg-white bg-gray-50 text-gray-800">
             <BrowserSupportWarning />
-            {/* Navbar - Hidden on print */}
-            <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 print:hidden">
-                <div className="container mx-auto px-4 py-3 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleViewChange('home')}>
-                            {/* <img src="https://blog.teacherjake.com/apps/assets/tj-logo.png" alt="Logo" className="h-10 w-auto" /> */}
-                            <a href="https://www.teacherjake.com" className="hover:opacity-80 transition-opacity">
-                                <img src={logo} alt="Teacher Jake Logo"
-                                    className="h-10 w-auto "></img>
-                            </a>
-                            <span className="hidden md:block font-bold text-gray-700">Worksheets</span>
+            {/* Navbar - Hidden on print or when hideNav is true */}
+            {!hideNav && (
+                <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 print:hidden">
+                    <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-2 cursor-pointer" onClick={() => handleViewChange('home')}>
+                                {/* <img src="https://blog.teacherjake.com/apps/assets/tj-logo.png" alt="Logo" className="h-10 w-auto" /> */}
+                                <a href="https://www.teacherjake.com" className="hover:opacity-80 transition-opacity">
+                                    <img src={logo} alt="Teacher Jake Logo"
+                                        className="h-10 w-auto "></img>
+                                </a>
+                                <span className="hidden md:block font-bold text-gray-700">Worksheets</span>
+                            </div>
+
+                            <div className="flex items-center gap-1 sm:gap-2 ml-4">
+                                <button
+                                    onClick={() => handleViewChange('home')}
+                                    className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-all ${
+                                        (view === 'home' || view === 'lesson')
+                                            ? 'text-green-700 bg-green-50 border border-green-150 shadow-sm'
+                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-transparent'
+                                    }`}
+                                >
+                                    Library
+                                </button>
+                                <button
+                                    onClick={() => handleViewChange('admin')}
+                                    title="Manage live worksheets in the online library"
+                                    className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-all ${
+                                        view === 'admin'
+                                            ? 'text-green-700 bg-green-50 border border-green-150 shadow-sm'
+                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-transparent'
+                                    }`}
+                                >
+                                    Admin
+                                </button>
+                                <button
+                                    onClick={() => handleViewChange('create')}
+                                    title="Generate standalone HTML files for offline/personal use"
+                                    className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-all ${
+                                        view === 'create'
+                                            ? 'text-green-700 bg-green-50 border border-green-150 shadow-sm'
+                                            : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-transparent'
+                                    }`}
+                                >
+                                    Create
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="flex items-center gap-1 sm:gap-2 ml-4">
-                            <button
-                                onClick={() => handleViewChange('home')}
-                                className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-all ${
-                                    (view === 'home' || view === 'lesson')
-                                        ? 'text-green-700 bg-green-50 border border-green-150 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-transparent'
-                                }`}
-                            >
-                                Library
-                            </button>
-                            <button
-                                onClick={() => handleViewChange('admin')}
-                                title="Manage live worksheets in the online library"
-                                className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-all ${
-                                    view === 'admin'
-                                        ? 'text-green-700 bg-green-50 border border-green-150 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-transparent'
-                                }`}
-                            >
-                                Admin
-                            </button>
-                            <button
-                                onClick={() => handleViewChange('create')}
-                                title="Generate standalone HTML files for offline/personal use"
-                                className={`px-3 py-1.5 text-sm font-bold rounded-lg transition-all ${
-                                    view === 'create'
-                                        ? 'text-green-700 bg-green-50 border border-green-150 shadow-sm'
-                                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border border-transparent'
-                                }`}
-                            >
-                                Create
-                            </button>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        {isLoggedIn ? (
-                            <>
-                                {view === 'lesson' && (
-                                    <>
-                                        <div className="hidden lg:block text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full truncate max-w-[150px] sm:max-w-[200px] md:max-w-[300px]" title={currentLesson?.title}>
-                                            {currentLesson?.title}
-                                        </div>
-                                        <Button
-                                            size="sm"
-                                            variant="secondary"
-                                            onClick={() => {
-                                                navigator.clipboard.writeText(window.location.href);
+                        <div className="flex items-center gap-3">
+                            {view === 'lesson' && (
+                                <>
+                                    <div className="hidden lg:block text-sm font-medium text-green-600 bg-green-50 px-3 py-1 rounded-full truncate max-w-[150px] sm:max-w-[200px] md:max-w-[300px]" title={currentLesson?.title}>
+                                        {currentLesson?.title}
+                                    </div>
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        onClick={() => {
+                                            try {
+                                                const url = new URL(window.location.href);
+                                                if (selectedLessonId) {
+                                                    url.searchParams.set('lesson', selectedLessonId);
+                                                }
+                                                url.searchParams.set('hidenav', '1');
+                                                url.searchParams.set('openExternalBrowser', '1');
+                                                navigator.clipboard.writeText(url.toString());
                                                 alert('Link copied to clipboard!');
-                                            }}
-                                            className="hidden sm:inline-flex"
-                                        >
-                                            Share
-                                        </Button>
+                                            } catch (e) {
+                                                console.error("Failed to copy share link:", e);
+                                            }
+                                        }}
+                                        className="hidden sm:inline-flex"
+                                    >
+                                        Share
+                                    </Button>
 
-                                        <button 
-                                            onClick={() => {
-                                                handleViewChange('home');
-                                                try {
-                                                    localStorage.removeItem(`lesson-progress-${currentLesson?.id}`);
-                                                } catch (e) {}
-                                            }}
-                                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
-                                            title="Close Lesson"
-                                        >
-                                            <X className="w-6 h-6" />
-                                        </button>
-                                    </>
-                                )}
+                                    <button 
+                                        onClick={() => {
+                                            handleViewChange('home');
+                                            try {
+                                                localStorage.removeItem(`lesson-progress-${currentLesson?.id}`);
+                                            } catch (e) {}
+                                        }}
+                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all"
+                                        title="Close Lesson"
+                                    >
+                                        <X className="w-6 h-6" />
+                                    </button>
+                                </>
+                            )}
 
+                            {isLoggedIn ? (
                                 <div className="relative">
                                     <button
                                         onClick={() => setShowProfileDropdown(!showProfileDropdown)}
@@ -292,13 +311,13 @@ const App: React.FC = () => {
                                         </>
                                     )}
                                 </div>
-                            </>
-                        ) : (
-                            <span className="text-sm font-medium text-gray-400">Please sign in</span>
-                        )}
+                            ) : (
+                                <span className="text-sm font-medium text-gray-400">Please sign in</span>
+                            )}
+                        </div>
                     </div>
-                </div>
-            </nav>
+                </nav>
+            )}
 
             <main className="container mx-auto px-0 py-4 print:p-0 print:m-0 print:max-w-none">
                 {view === 'create' ? (
@@ -314,7 +333,7 @@ const App: React.FC = () => {
                             }}
                         />
                     </div>
-                ) : !isLoggedIn ? (
+                ) : !isLoggedIn && view !== 'lesson' ? (
                     <div className="py-12 px-4">
                         <div className="max-w-md mx-auto bg-amber-50 border-l-4 border-amber-400 p-4 mb-6 rounded-r-xl shadow-sm animate-in fade-in slide-in-from-top-2 duration-500">
                             <div className="flex items-start gap-3">
@@ -512,7 +531,19 @@ const App: React.FC = () => {
                         onLogout={handleLogout}
                     />
                 ) : (
-                    currentLesson && <LessonView lesson={currentLesson} />
+                    currentLesson ? (
+                        <LessonView lesson={currentLesson} />
+                    ) : loadingLesson ? (
+                        <div className="flex justify-center items-center py-12 text-green-600">
+                            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Loading Lesson content...
+                        </div>
+                    ) : (
+                        <div className="text-center py-12 text-gray-500 font-medium">Lesson not found.</div>
+                    )
                 )}
             </main>
 
