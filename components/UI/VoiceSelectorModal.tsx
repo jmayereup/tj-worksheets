@@ -134,7 +134,18 @@ export const VoiceSelectorModal: React.FC<Props> = ({
                     ) : (
                         voices.map((voice) => {
                             const isSelected = audioPreference === 'tts' && voice.name === selectedVoiceName;
-                            const isNatural = voice.name.toLowerCase().includes('natural') || voice.name.toLowerCase().includes('google') || voice.name.toLowerCase().includes('enhanced');
+                            const vName = voice.name.toLowerCase();
+                            const isNatural =
+                                vName.includes('natural') ||
+                                vName.includes('google') ||
+                                vName.includes('enhanced') ||
+                                vName.includes('premium') ||
+                                vName.includes('neural') ||
+                                vName.includes('wavenet') ||
+                                vName.includes('multilingual') ||
+                                vName.includes('multi-lingual') ||
+                                vName.includes('siri') ||
+                                vName.includes('alex');
 
                             return (
                                 <div

@@ -51,16 +51,23 @@ export const useTTS = ({
 
       const synth = window.speechSynthesis;
       const allVoices = synth.getVoices();
-      const currentVoice = allVoices.find(v => v.name === selectedVoiceName);
       
-      const langPrefix = langCode.split(/[-_]/)[0].toLowerCase();
-      const currentVoicePrefix = currentVoice?.lang.split(/[-_]/)[0].toLowerCase();
+      const savedVoiceName = typeof localStorage !== 'undefined' 
+        ? localStorage.getItem(`reader-voice-${langCode}`)
+        : null;
 
-      // If no voice selected, OR if the selected voice doesn't match the current language 
-      // (and the user hasn't explicitly chosen it for THIS session/language)
-      if (!selectedVoiceName || (currentVoicePrefix !== langPrefix && !userHasSelectedVoice.current)) {
-        const best = getBestVoice(langCode);
-        if (best) setSelectedVoiceName(best.name);
+      if (savedVoiceName && allVoices.some(v => v.name === savedVoiceName)) {
+        setSelectedVoiceName(savedVoiceName);
+        userHasSelectedVoice.current = true;
+      } else {
+        const currentVoice = allVoices.find(v => v.name === selectedVoiceName);
+        const langPrefix = langCode.split(/[-_]/)[0].toLowerCase();
+        const currentVoicePrefix = currentVoice?.lang.split(/[-_]/)[0].toLowerCase();
+
+        if (!selectedVoiceName || (currentVoicePrefix !== langPrefix && !userHasSelectedVoice.current)) {
+          const best = getBestVoice(langCode);
+          if (best) setSelectedVoiceName(best.name);
+        }
       }
     };
 
@@ -208,7 +215,15 @@ export const useTTS = ({
   const handleSetSelectedVoiceName = useCallback((name: string | null) => {
     userHasSelectedVoice.current = true;
     setSelectedVoiceName(name);
-  }, []);
+    if (typeof localStorage !== 'undefined') {
+      const langCode = getLangCode(language);
+      if (name) {
+        localStorage.setItem(`reader-voice-${langCode}`, name);
+      } else {
+        localStorage.removeItem(`reader-voice-${langCode}`);
+      }
+    }
+  }, [language]);
 
   const handleSetAudioPreference = useCallback((pref: 'recorded' | 'tts') => {
     userHasSelectedVoice.current = true;
