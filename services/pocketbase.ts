@@ -447,3 +447,31 @@ export const updateLesson = async (id: string, data: any) => {
 export const deleteLesson = async (id: string) => {
   return await pb.collection('worksheets').delete(id);
 };
+
+let submissionUrlPromise: Promise<string | null> | null = null;
+
+export const fetchTeacherSubmissionUrl = async (recordId: string = 'sztxr8rn7a7uyun'): Promise<string | null> => {
+  if (submissionUrlPromise) {
+    return submissionUrlPromise;
+  }
+
+  submissionUrlPromise = (async () => {
+    try {
+      const record: any = await pb.collection('tj_components_teacher_info').getOne(recordId);
+      if (record?.url && typeof record.url === 'string' && record.url.trim() !== '') {
+        return record.url.trim();
+      }
+      console.warn(`Record ${recordId} in tj_components_teacher_info had no valid submission URL.`);
+      return null;
+    } catch (err) {
+      console.error(`Failed to fetch teacher submission URL from PocketBase (record ${recordId}):`, err);
+      return null;
+    }
+  })();
+
+  const result = await submissionUrlPromise;
+  if (!result) {
+    submissionUrlPromise = null;
+  }
+  return result;
+};

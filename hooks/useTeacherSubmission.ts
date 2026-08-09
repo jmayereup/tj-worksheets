@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { config } from '../config';
+import { fetchTeacherSubmissionUrl } from '../services/pocketbase';
 
 export interface SubmissionPayload {
   nickname: string;
@@ -19,9 +19,11 @@ export const useTeacherSubmission = () => {
   const [submissionMessage, setSubmissionMessage] = useState('');
 
   const submitScore = useCallback(async (payload: SubmissionPayload) => {
-    const submissionUrl = config?.submissionUrl;
+    const submissionUrl = await fetchTeacherSubmissionUrl();
     
     if (!submissionUrl) {
+      setSubmissionStatus('error');
+      setSubmissionMessage('Teacher submission is not configured for this lesson.');
       return { success: false, message: 'Teacher submission is not configured for this lesson.' };
     }
 
