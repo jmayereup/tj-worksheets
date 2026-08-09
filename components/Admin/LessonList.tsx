@@ -271,7 +271,11 @@ export const LessonList: React.FC<LessonListProps> = ({ onEdit, onPreview, onAdd
                                 </td>
                                 <td className="px-6 py-5">
                                     <div className="flex items-center gap-4">
-                                        <div className="w-16 h-10 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200">
+                                        <div 
+                                            className="w-16 h-10 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
+                                            onClick={() => window.open(`/?lesson=${lesson.id}`, '_blank')}
+                                            title="Open in library view"
+                                        >
                                             {lesson.imageUrl ? (
                                                 <img src={lesson.imageUrl} alt="" className="w-full h-full object-cover" />
                                             ) : (
@@ -281,7 +285,11 @@ export const LessonList: React.FC<LessonListProps> = ({ onEdit, onPreview, onAdd
                                             )}
                                         </div>
                                         <div>
-                                            <div className="font-extrabold text-gray-900 group-hover:text-green-700 transition-colors line-clamp-1">
+                                            <div 
+                                                className="font-extrabold text-gray-900 group-hover:text-green-700 cursor-pointer hover:underline transition-colors line-clamp-1"
+                                                onClick={() => window.open(`/?lesson=${lesson.id}`, '_blank')}
+                                                title="Open in library view"
+                                            >
                                                 {lesson.title}
                                             </div>
                                             <div className="text-[10px] font-mono text-gray-400 mt-0.5">ID: {lesson.id}</div>
@@ -377,7 +385,11 @@ export const LessonList: React.FC<LessonListProps> = ({ onEdit, onPreview, onAdd
                                         <Square className="w-6 h-6" />
                                     )}
                                 </button>
-                                <div className="w-20 h-14 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200 shadow-sm">
+                                <div 
+                                    className="w-20 h-14 rounded-lg bg-gray-100 overflow-hidden shrink-0 border border-gray-200 shadow-sm cursor-pointer hover:opacity-80 transition-opacity"
+                                    onClick={() => window.open(`/?lesson=${lesson.id}`, '_blank')}
+                                    title="Open in library view"
+                                >
                                     {lesson.imageUrl ? (
                                         <img src={lesson.imageUrl} alt="" className="w-full h-full object-cover" />
                                     ) : (
@@ -387,7 +399,11 @@ export const LessonList: React.FC<LessonListProps> = ({ onEdit, onPreview, onAdd
                                     )}
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                    <div className="font-extrabold text-gray-900 leading-snug line-clamp-2">
+                                    <div 
+                                        className="font-extrabold text-gray-900 leading-snug line-clamp-2 cursor-pointer hover:text-green-700 hover:underline transition-colors"
+                                        onClick={() => window.open(`/?lesson=${lesson.id}`, '_blank')}
+                                        title="Open in library view"
+                                    >
                                         {lesson.title}
                                     </div>
                                     <div className="flex flex-wrap gap-2 mt-2">
