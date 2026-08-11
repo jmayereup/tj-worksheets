@@ -5,6 +5,8 @@ import { ParsedLesson } from '../../types';
 import { getComponentConfig } from '../../utils/componentMapper';
 import { compileLessonHtml, buildPreviewElementHtml } from '../../utils/htmlCompiler';
 
+import { fetchTeacherSubmissionUrl } from '../../services/pocketbase';
+
 interface WebComponentPreviewProps {
   lesson: ParsedLesson;
   onClose: () => void;
@@ -13,6 +15,17 @@ interface WebComponentPreviewProps {
 export const WebComponentPreview: React.FC<WebComponentPreviewProps> = ({ lesson, onClose }) => {
   const [activeTab, setActiveTab] = useState<'preview' | 'compiled-preview' | 'code'>('preview');
   const [copied, setCopied] = useState(false);
+  const [submissionUrl, setSubmissionUrl] = useState<string>('');
+
+  useEffect(() => {
+    let isCancelled = false;
+    fetchTeacherSubmissionUrl().then(url => {
+      if (!isCancelled && url) {
+        setSubmissionUrl(url);
+      }
+    });
+    return () => { isCancelled = true; };
+  }, []);
 
   // Minimal lesson data for the embed script
   const embedData = JSON.stringify({
@@ -36,7 +49,7 @@ export const WebComponentPreview: React.FC<WebComponentPreviewProps> = ({ lesson
 
   const componentConfig = getComponentConfig(lesson.lessonType);
 
-  const compiledHtml = compileLessonHtml(lesson, lesson.html || '');
+  const compiledHtml = compileLessonHtml(lesson, lesson.html || '', submissionUrl);
   const embedCode = compiledHtml;
 
   const handleCopy = () => {
@@ -132,7 +145,7 @@ export const WebComponentPreview: React.FC<WebComponentPreviewProps> = ({ lesson
   const renderPreview = () => {
     if (!componentConfig) {
       return (
-        <tj-pocketbase-worksheet>
+        <tj-pocketbase-worksheet {...(submissionUrl ? { 'submission-url': submissionUrl } : {})}>
           <script type="application/json">
             {embedData}
           </script>
@@ -140,7 +153,7 @@ export const WebComponentPreview: React.FC<WebComponentPreviewProps> = ({ lesson
       );
     }
 
-    const { elementHtml } = buildPreviewElementHtml(lesson);
+    const { elementHtml } = buildPreviewElementHtml(lesson, submissionUrl);
 
     const htmlContent = lesson.html || '';
     const placeholderRegex = /<(?:lesson-component|web-component)\b[^>]*>(?:<\/(?:lesson-component|web-component)>)?|<(?:lesson-component|web-component)\b[^>]*\/>/i;

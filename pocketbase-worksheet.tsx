@@ -14,11 +14,11 @@ export class TJPocketBaseWorksheet extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ['code'];
+    return ['code', 'submission-url', 'submission_url'];
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
-    if (name === 'code' && oldValue !== newValue) {
+    if ((name === 'code' || name === 'submission-url' || name === 'submission_url') && oldValue !== newValue) {
       this.render();
     }
   }
@@ -35,10 +35,23 @@ export class TJPocketBaseWorksheet extends HTMLElement {
     }
   }
 
+  get submissionUrl(): string {
+    return this.getAttribute('submission-url') || this.getAttribute('submission_url') || '';
+  }
+
+  set submissionUrl(val: string) {
+    if (val) {
+      this.setAttribute('submission-url', val);
+    } else {
+      this.removeAttribute('submission-url');
+    }
+  }
+
   connectedCallback() {
     this.classList.add('tj-printable-worksheet');
     this.injectGlobalPrintStyles();
     this.upgradeProperty('code');
+    this.upgradeProperty('submissionUrl');
     this.render();
   }
 
@@ -169,7 +182,7 @@ export class TJPocketBaseWorksheet extends HTMLElement {
         this.root.render(
           <React.StrictMode>
             <ErrorBoundary>
-              {lessonData && <LessonView lesson={lessonData} teacherCode={this.code} />}
+              {lessonData && <LessonView lesson={lessonData} teacherCode={this.code} submissionUrl={this.submissionUrl} />}
             </ErrorBoundary>
           </React.StrictMode>
         );

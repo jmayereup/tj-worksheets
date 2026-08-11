@@ -299,9 +299,10 @@ export const fetchPaginatedLessons = async (
 };
 
 // Helper to compile HTML for a saved record
-const compileHtmlForRecord = (record: any): string => {
+const compileHtmlForRecord = async (record: any): Promise<string> => {
   const imageUrl = record.image ? getFileUrl(record, record.image) : undefined;
   const audioFileUrl = record.audioFile ? getFileUrl(record, record.audioFile) : undefined;
+  const submissionUrl = await fetchTeacherSubmissionUrl();
 
   const parseJSON = (val: any) => {
     if (typeof val === 'string') {
@@ -333,7 +334,7 @@ const compileHtmlForRecord = (record: any): string => {
     updated: record.updated
   };
 
-  return compileLessonHtml(lessonForCompile, record.html || '');
+  return compileLessonHtml(lessonForCompile, record.html || '', submissionUrl || undefined);
 };
 
 // Detect whether a payload already carries a pre-computed htmlCompiled value
@@ -396,7 +397,7 @@ export const createLesson = async (data: any) => {
     // value derived from the current input state (e.g. the LessonEditor
     // computes it from form state and appends it to the same request).
     if (!hasPreComputedHtmlCompiled(data)) {
-      const compiled = compileHtmlForRecord(record);
+      const compiled = await compileHtmlForRecord(record);
       record = await pb.collection('worksheets').update(record.id, { htmlCompiled: compiled });
     }
   } catch (err) {
@@ -434,7 +435,7 @@ export const updateLesson = async (id: string, data: any) => {
     // value derived from the current input state (e.g. the LessonEditor
     // computes it from form state and appends it to the same request).
     if (!hasPreComputedHtmlCompiled(data)) {
-      const compiled = compileHtmlForRecord(record);
+      const compiled = await compileHtmlForRecord(record);
       record = await pb.collection('worksheets').update(record.id, { htmlCompiled: compiled });
     }
   } catch (err) {
@@ -449,8 +450,14 @@ export const deleteLesson = async (id: string) => {
 };
 
 let submissionUrlPromise: Promise<string | null> | null = null;
+let cachedSubmissionUrl: string | null = null;
+
+export const getCachedSubmissionUrl = (): string | null => cachedSubmissionUrl;
 
 export const fetchTeacherSubmissionUrl = async (recordId: string = 'sztxr8rn7a7uyun'): Promise<string | null> => {
+  if (cachedSubmissionUrl) {
+    return cachedSubmissionUrl;
+  }
   if (submissionUrlPromise) {
     return submissionUrlPromise;
   }
@@ -459,7 +466,8 @@ export const fetchTeacherSubmissionUrl = async (recordId: string = 'sztxr8rn7a7u
     try {
       const record: any = await pb.collection('tj_components_teacher_info').getOne(recordId);
       if (record?.url && typeof record.url === 'string' && record.url.trim() !== '') {
-        return record.url.trim();
+        cachedSubmissionUrl = record.url.trim();
+        return cachedSubmissionUrl;
       }
       console.warn(`Record ${recordId} in tj_components_teacher_info had no valid submission URL.`);
       return null;

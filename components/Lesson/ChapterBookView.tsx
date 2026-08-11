@@ -36,6 +36,7 @@ interface ChapterBookViewProps {
   audioPreference: 'recorded' | 'tts';
   setAudioPreference: (pref: 'recorded' | 'tts') => void;
   teacherCode?: string;
+  submissionUrl?: string;
 }
 
 export const ChapterBookView: React.FC<ChapterBookViewProps> = ({
@@ -61,6 +62,7 @@ export const ChapterBookView: React.FC<ChapterBookViewProps> = ({
   audioPreference,
   setAudioPreference,
   teacherCode,
+  submissionUrl,
 }) => {
   const content = lesson.content;
   const [currentChapterIndex, setCurrentChapterIndex] = useState(answers.focusedReaderPage || 0);

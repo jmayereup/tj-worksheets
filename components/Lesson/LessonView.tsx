@@ -11,6 +11,8 @@ import { ReportCard } from '../UI/ReportCard';
 import { LessonMedia } from '../UI/LessonMedia';
 
 
+import { fetchTeacherSubmissionUrl } from '../../services/pocketbase';
+
 const InformationGapView = React.lazy(() => import('./InformationGapView').then(m => ({ default: m.InformationGapView })));
 const WorksheetView = React.lazy(() => import('./WorksheetView').then(m => ({ default: m.WorksheetView })));
 const FocusedReaderView = React.lazy(() => import('./FocusedReaderView').then(m => ({ default: m.FocusedReaderView })));
@@ -20,6 +22,7 @@ const ChapterBookView = React.lazy(() => import('./ChapterBookView').then(m => (
 interface Props {
   lesson: ParsedLesson;
   teacherCode?: string;
+  submissionUrl?: string;
 }
 
 const isStandardLesson = (content: LessonContent): content is StandardLessonContent => {
@@ -45,7 +48,7 @@ const isChapterBook = (content: LessonContent): content is ChapterBookContent =>
   return content !== null && typeof content === 'object' && 'chapters' in content && Array.isArray((content as any).chapters);
 };
 
-export const LessonView: React.FC<Props> = ({ lesson, teacherCode }) => {
+export const LessonView: React.FC<Props> = ({ lesson, teacherCode, submissionUrl }) => {
   const isStandard = isStandardLesson(lesson.content);
   const isFocused = isFocusedReader(lesson.content);
   const isBlaster = isWordBlaster(lesson.content);
@@ -102,21 +105,43 @@ export const LessonView: React.FC<Props> = ({ lesson, teacherCode }) => {
     }
   }, [effectiveLessonType]);
 
-  // Automatically apply teacher code to nested custom elements in the HTML content
+  // Automatically apply teacher code and submission URL to nested custom elements in the HTML content
   useEffect(() => {
     if (!containerRef.current) return;
     const effectiveCode = (teacherCode || lesson.teacherCode || '6767').trim();
 
-    // Find all custom elements containing a hyphen in their tag name
-    const elements = containerRef.current.querySelectorAll('*');
-    elements.forEach(el => {
-      // Skip the main worksheet wrapper tag itself to avoid infinite setting loop
-      if (el.tagName.includes('-') && el.tagName.toLowerCase() !== 'tj-pocketbase-worksheet') {
-        el.setAttribute('code', effectiveCode);
-        (el as any).code = effectiveCode;
-      }
-    });
-  }, [htmlContent, teacherCode, lesson.teacherCode, resetKey]);
+    const applyAttrs = (subUrl: string) => {
+      if (!containerRef.current) return;
+      const elements = containerRef.current.querySelectorAll('*');
+      elements.forEach(el => {
+        // Skip the main worksheet wrapper tag itself to avoid infinite setting loop
+        if (el.tagName.includes('-') && el.tagName.toLowerCase() !== 'tj-pocketbase-worksheet') {
+          el.setAttribute('code', effectiveCode);
+          (el as any).code = effectiveCode;
+
+          const effectiveUrl = (submissionUrl || lesson.submissionUrl || lesson.customConfig?.submissionUrl || subUrl || '').trim();
+          if (effectiveUrl) {
+            el.setAttribute('submission-url', effectiveUrl);
+            (el as any).submissionUrl = effectiveUrl;
+          }
+        }
+      });
+    };
+
+    let isCancelled = false;
+    const directUrl = submissionUrl || lesson.submissionUrl || lesson.customConfig?.submissionUrl;
+    if (directUrl) {
+      applyAttrs(directUrl);
+    } else {
+      fetchTeacherSubmissionUrl().then(url => {
+        if (!isCancelled) {
+          applyAttrs(url || '');
+        }
+      });
+    }
+
+    return () => { isCancelled = true; };
+  }, [htmlContent, teacherCode, lesson.teacherCode, lesson.submissionUrl, lesson.customConfig?.submissionUrl, submissionUrl, resetKey]);
 
   // Determine Translation Language
   const getTranslationLanguage = () => {

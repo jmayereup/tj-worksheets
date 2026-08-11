@@ -18,7 +18,8 @@ export default defineConfig(({ mode }) => {
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
       'process.env.NODE_ENV': JSON.stringify(mode),
       'process.env.POCKETBASE_URL': JSON.stringify(env.POCKETBASE_URL || env.PUBLIC_POCKETBASE_URL || env.VITE_POCKETBASE_URL || 'https://pb.teacherjake.com'),
-      'process.env.FILES_BASE_URL': JSON.stringify(env.FILES_BASE_URL || 'https://files.teacherjake.com')
+      'process.env.FILES_BASE_URL': JSON.stringify(env.FILES_BASE_URL || 'https://files.teacherjake.com'),
+      'process.env.VITE_GAS_SUBMISSION_URL': JSON.stringify(env.VITE_GAS_SUBMISSION_URL || env.VITE_SUBMISSION_URL || '')
     },
     resolve: {
       alias: {

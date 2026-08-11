@@ -51,12 +51,18 @@ const buildCustomElementHtml = (
   return `<${tagName}${attrString}>\n  ${innerHtml}\n</${tagName}>`;
 };
 
-export const compileLessonHtml = (lesson: any, rawHtml: string): string => {
+export const compileLessonHtml = (lesson: any, rawHtml: string, overrideSubmissionUrl?: string): string => {
   const componentConfig = getComponentConfig(lesson.lessonType);
   const title = lesson.title || 'Interactive Worksheet';
   const description = lesson.seo || '';
   const teacherCode = lesson.teacherCode || '';
   const language = lesson.language || '';
+  const submissionUrl = 
+    overrideSubmissionUrl || 
+    lesson.submissionUrl || 
+    lesson.customConfig?.submissionUrl || 
+    (typeof process !== 'undefined' ? (process.env.VITE_GAS_SUBMISSION_URL || process.env.VITE_SUBMISSION_URL) : '') || 
+    '';
 
   // 1. Build the interactive component HTML
   let elementHtml = '';
@@ -64,6 +70,9 @@ export const compileLessonHtml = (lesson: any, rawHtml: string): string => {
     const autoAttrs: AutoAttrs[] = [];
     if (teacherCode) {
       autoAttrs.push({ name: 'code', value: teacherCode });
+    }
+    if (submissionUrl) {
+      autoAttrs.push({ name: 'submission-url', value: submissionUrl });
     }
 
     if (lesson.lessonType === 'lbl-reader') {
@@ -194,7 +203,8 @@ ${embedData}
  * but returns just the element HTML (no script tag, no outer article).
  */
 export const buildPreviewElementHtml = (
-  lesson: any
+  lesson: any,
+  overrideSubmissionUrl?: string
 ): { elementHtml: string; contentMode: 'json' | 'html' | 'markdown' } => {
   const componentConfig = getComponentConfig(lesson.lessonType);
   if (!componentConfig) {
@@ -203,10 +213,19 @@ export const buildPreviewElementHtml = (
 
   const teacherCode = lesson.teacherCode || '';
   const language = lesson.language || '';
+  const submissionUrl = 
+    overrideSubmissionUrl || 
+    lesson.submissionUrl || 
+    lesson.customConfig?.submissionUrl || 
+    (typeof process !== 'undefined' ? (process.env.VITE_GAS_SUBMISSION_URL || process.env.VITE_SUBMISSION_URL) : '') || 
+    '';
 
   const autoAttrs: AutoAttrs[] = [];
   if (teacherCode) {
     autoAttrs.push({ name: 'code', value: teacherCode });
+  }
+  if (submissionUrl) {
+    autoAttrs.push({ name: 'submission-url', value: submissionUrl });
   }
   if (lesson.lessonType === 'lbl-reader') {
     autoAttrs.push({ name: 'lang-original', value: language });
