@@ -30,6 +30,7 @@ export const ReportCard: React.FC<Props> = ({ data, onClose, teacherCode = '6767
   const [enteredCode, setEnteredCode] = useState('');
 
   const handleSubmitScore = async () => {
+    if (isSubmitting) return;
     const targetCode = (teacherCode || '6767').trim();
     if (enteredCode.trim() !== targetCode) {
       alert('Incorrect Teacher Code. Please take a screenshot of your report card and show it to your teacher.');

@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { FillInBlankItem, VocabularyItem } from '../../types';
 import { normalizeString, seededShuffle, shouldShowAudioControls } from '../../utils/textUtils';
 import { Button } from '../UI/Button';
-import { Check, XCircle } from 'lucide-react';
+import { Check, XCircle, RefreshCw } from 'lucide-react';
 import { AudioControls } from '../UI/AudioControls';
 
 interface Props {
@@ -19,6 +19,8 @@ interface Props {
   ttsState: { status: 'playing' | 'paused' | 'stopped', rate: number };
   lessonId: string;
 }
+
+const MAX_CONTINUES = 3;
 
 export const FillInBlanks: React.FC<Props> = ({
   data,
@@ -37,6 +39,7 @@ export const FillInBlanks: React.FC<Props> = ({
   const [isChecked, setIsChecked] = useState(savedIsChecked);
   const [activeSpeechIdx, setActiveSpeechIdx] = useState<number | null>(null);
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
+  const [continueCount, setContinueCount] = useState(0);
 
   // Randomize question order once on mount/data change
   const shuffledIndices = useMemo(() => {
@@ -95,6 +98,8 @@ export const FillInBlanks: React.FC<Props> = ({
   };
 
   const handleRetry = () => {
+    if (continueCount >= MAX_CONTINUES) return;
+
     // Keep only correct matches
     const newAnswers: Record<number, string> = {};
     data.forEach((item, idx) => {
@@ -104,6 +109,7 @@ export const FillInBlanks: React.FC<Props> = ({
       }
     });
 
+    setContinueCount(prev => prev + 1);
     setIsChecked(false);
     onChange(newAnswers);
     setSelectedWord(null);
@@ -111,6 +117,7 @@ export const FillInBlanks: React.FC<Props> = ({
   };
 
   const handleFullReset = () => {
+    setContinueCount(0);
     setIsChecked(false);
     onChange({});
     setSelectedWord(null);
@@ -240,36 +247,43 @@ export const FillInBlanks: React.FC<Props> = ({
       )}
 
       {/* Actions */}
-      <div className="mt-4 flex flex-wrap justify-center gap-4">
-        {!isChecked ? (
-          <Button
-            onClick={handleCheck}
-            variant='primary'
-            size='md'
-            disabled={Object.keys(savedAnswers).length === 0}
-          >
-            <Check size={20} /> Check Answers
-          </Button>
-        ) : (
-          <>
-            {correctCount < data.length && (
+      <div className="mt-4 flex flex-col items-center gap-4">
+        {isChecked && correctCount < data.length && continueCount >= MAX_CONTINUES && (
+          <div className="text-red-600 font-semibold text-sm bg-red-50 px-4 py-2 rounded-lg border border-red-200">
+            No continues remaining (3/3 used). You must reset the activity to try again.
+          </div>
+        )}
+        <div className="flex flex-wrap justify-center gap-4">
+          {!isChecked ? (
+            <Button
+              onClick={handleCheck}
+              variant='primary'
+              size='md'
+              disabled={Object.keys(savedAnswers).length === 0}
+            >
+              <Check size={20} /> Check Answers
+            </Button>
+          ) : (
+            <>
+              {correctCount < data.length && continueCount < MAX_CONTINUES && (
+                <Button
+                  onClick={handleRetry}
+                  variant="primary"
+                  size="md"
+                >
+                  <RefreshCw className="w-5 h-5 mr-2" /> Continue ({MAX_CONTINUES - continueCount} left)
+                </Button>
+              )}
               <Button
-                onClick={handleRetry}
-                variant="primary"
+                onClick={handleFullReset}
+                variant="danger"
                 size="md"
               >
-                Continue
+                Reset Activity
               </Button>
-            )}
-            <Button
-              onClick={handleFullReset}
-              variant="danger"
-              size="md"
-            >
-              Reset Activity
-            </Button>
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
     </section>
   );
