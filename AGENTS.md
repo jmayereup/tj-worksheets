@@ -222,7 +222,8 @@ The React app does NOT consume `htmlCompiled` at runtime — it always re-derive
 | `speed-review` | `tj-speed-review` | `tj-speed-review.js` |
 | `chapter-book` | `tj-chapter-book` | `tj-chapter-book.js` |
 | `pronunciation` | `tj-pronunciation` | `tj-pronunciation.js` |
-| `quiz-element` | `tj-quiz-element` | `tj-quiz-element.js` |
+| `tj-test` | `tj-test` | `tj-test.js` |
+| `quiz-element` (legacy) | `tj-quiz-element` | `tj-quiz-element.js` |
 | `worksheet` / `focused-reading` / `word-blaster` | *(none — React-only or `tj-pocketbase-worksheet`)* | falls back to inline React `WorksheetView` or the bundled `<tj-pocketbase-worksheet>` element |
 
 The React app injects the CDN script dynamically (no bundling):
@@ -304,7 +305,7 @@ const effectiveLessonType = lesson.lessonType || (
 );
 ```
 
-- `'lbl-reader' | 'grammar-hearts' | 'listening' | 'speed-review' | 'pronunciation' | 'quiz-element'` → render the external WC inline (`dangerouslySetInnerHTML` with the bundle's `<tj-*>` element) and inject its `<script>` once
+- `'lbl-reader' | 'grammar-hearts' | 'listening' | 'speed-review' | 'pronunciation' | 'tj-test' | 'quiz-element'` → render the external WC inline (`dangerouslySetInnerHTML` with the bundle's `<tj-*>` element) and inject its `<script>` once
 - `'information-gap' | 'focused-reading' | 'word-blaster' | 'chapter-book' | 'worksheet'` (and fallback `'standard'`) → render the corresponding React view in a `React.Suspense`
 
 The `html` field is split at any `<lesson-component>` / `<web-component>` placeholder, and the interactive content is rendered between the parts (so users can write instructions that wrap around the component).

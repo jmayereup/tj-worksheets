@@ -4,7 +4,7 @@ import { usePaginatedLessons, useDeleteLesson } from '../../hooks/useLessons';
 import { Button } from '../UI/Button';
 import { Edit, Trash2, ExternalLink, RefreshCw, Layers, Globe, Calendar, Eye, EyeOff, Search, FileText, CheckSquare, Square, Rocket, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { extractVocabularyFromLessons } from '../../utils/vocabularyExtractor';
-import { LANGUAGE_OPTIONS, LESSON_TYPE_OPTIONS } from '../../types';
+import { LANGUAGE_OPTIONS, LESSON_TYPE_OPTIONS, formatLessonType } from '../../types';
 
 interface LessonListProps {
     onEdit: (id: string) => void;
@@ -209,7 +209,7 @@ export const LessonList: React.FC<LessonListProps> = ({ onEdit, onPreview, onAdd
                         >
                             <option value="All">All Types</option>
                             {LESSON_TYPE_OPTIONS.map(type => (
-                                <option key={type} value={type}>{type.replace('-', ' ')}</option>
+                                <option key={type} value={type}>{formatLessonType(type)}</option>
                             ))}
                         </select>
                         <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
@@ -305,7 +305,7 @@ export const LessonList: React.FC<LessonListProps> = ({ onEdit, onPreview, onAdd
                                             <Layers className="w-3 h-3" /> {lesson.level}
                                         </span>
                                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-green-50 text-green-700 text-[10px] font-black border border-green-100 uppercase">
-                                            <FileText className="w-3 h-3" /> {lesson.lessonType?.replace('-', ' ')}
+                                            <FileText className="w-3 h-3" /> {formatLessonType(lesson.lessonType)}
                                         </span>
                                         {lesson.notForBlog && (
                                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 text-[10px] font-black border border-amber-100 uppercase" title="Excluded from blog">
@@ -414,7 +414,7 @@ export const LessonList: React.FC<LessonListProps> = ({ onEdit, onPreview, onAdd
                                             <Layers className="w-2.5 h-2.5" /> {lesson.level}
                                         </span>
                                         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-green-50 text-green-700 text-[9px] font-black border border-green-100 uppercase">
-                                            <FileText className="w-2.5 h-2.5" /> {lesson.lessonType?.replace('-', ' ')}
+                                            <FileText className="w-2.5 h-2.5" /> {formatLessonType(lesson.lessonType)}
                                         </span>
                                     </div>
                                 </div>

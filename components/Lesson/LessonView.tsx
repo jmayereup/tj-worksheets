@@ -243,7 +243,7 @@ export const LessonView: React.FC<Props> = ({ lesson, teacherCode, submissionUrl
 
   const renderLessonContent = () => (
     <React.Suspense fallback={<div className="flex items-center justify-center p-20"><Loader className="w-8 h-8 animate-spin text-green-600" /></div>}>
-      {['lbl-reader', 'grammar-hearts', 'listening', 'speed-review', 'pronunciation', 'quiz-element'].includes(effectiveLessonType) ? (
+      {['lbl-reader', 'grammar-hearts', 'listening', 'speed-review', 'pronunciation', 'quiz-element', 'tj-test', 'test'].includes(effectiveLessonType) ? (
         <div className="tj-external-wc-container min-h-[500px]">
           <LessonMedia
             videoUrl={lesson.videoUrl}

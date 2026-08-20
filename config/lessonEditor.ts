@@ -16,6 +16,8 @@ export const GEMINI_URLS: Record<string, string> = {
   'listening': 'https://gemini.google.com/gem/a282ff7b4b26',
   'lbl-reader': 'https://gemini.google.com/gem/9dfd58f9fc59',
   'chapter-book': 'https://gemini.google.com/gem/209dda1b768d',
+  'tj-test': 'https://gemini.google.com/gem/1GR1C-bhcrWfUS79b0SA1Llna4NiWaCef?usp=sharing',
+  'test': 'https://gemini.google.com/gem/1GR1C-bhcrWfUS79b0SA1Llna4NiWaCef?usp=sharing',
   'default': 'https://gemini.google.com/gem/03def3a81ea5'
 };
 

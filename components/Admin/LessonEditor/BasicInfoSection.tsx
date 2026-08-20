@@ -1,7 +1,7 @@
 import React from 'react';
 import { Globe, Layers, Layout, Tag as TagIcon, Check } from 'lucide-react';
 import { SearchableSelect } from '../../UI/SearchableSelect';
-import { LANGUAGE_OPTIONS, LEVEL_OPTIONS, TAG_OPTIONS, LESSON_TYPE_OPTIONS } from '../../../types';
+import { LANGUAGE_OPTIONS, LEVEL_OPTIONS, TAG_OPTIONS, LESSON_TYPE_OPTIONS, formatLessonType } from '../../../types';
 
 interface BasicInfoSectionProps {
   title: string;
@@ -106,7 +106,7 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
           >
             <option value="" disabled>Select lesson type...</option>
             {LESSON_TYPE_OPTIONS.map(opt => (
-              <option key={opt} value={opt}>{opt.charAt(0).toUpperCase() + opt.slice(1).replace('-', ' ')}</option>
+              <option key={opt} value={opt}>{formatLessonType(opt)}</option>
             ))}
           </select>
         </div>

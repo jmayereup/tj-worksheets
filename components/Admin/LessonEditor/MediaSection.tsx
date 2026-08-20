@@ -64,7 +64,7 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
         </div>
       </div>
 
-      <div className={lessonType === 'quiz-element' ? "grid grid-cols-1 md:grid-cols-2 gap-4" : ""}>
+      <div className={['quiz-element', 'tj-test', 'test'].includes(lessonType) ? "grid grid-cols-1 md:grid-cols-2 gap-4" : ""}>
         <div>
           <label className="block text-sm font-black text-gray-700 mb-2 ml-1 uppercase tracking-wider">Teacher Code</label>
           <div className="relative">
@@ -81,13 +81,17 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
           </div>
         </div>
 
-        {lessonType === 'quiz-element' && (
+        {['quiz-element', 'tj-test', 'test'].includes(lessonType) && (
           <div>
-            <label className="block text-sm font-black text-gray-700 mb-2 ml-1 uppercase tracking-wider">Quiz Settings</label>
+            <label className="block text-sm font-black text-gray-700 mb-2 ml-1 uppercase tracking-wider">
+              {lessonType === 'quiz-element' ? 'Quiz Settings (Legacy)' : 'Test Settings'}
+            </label>
             <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl min-h-[50px]">
               <div className="flex flex-col">
                 <span className="text-sm font-bold text-gray-800">Test Mode</span>
-                <span className="text-xs text-gray-400">Lock quiz behind Teacher Code</span>
+                <span className="text-xs text-gray-400">
+                  {lessonType === 'quiz-element' ? 'Lock quiz behind Teacher Code' : 'Lock test behind Start / Teacher Code'}
+                </span>
               </div>
               <label className="relative inline-flex items-center cursor-pointer">
                 <input 

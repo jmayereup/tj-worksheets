@@ -271,6 +271,13 @@ export const LEVEL_OPTIONS = Object.values(WorksheetsLevelOptions);
 export const TAG_OPTIONS = Object.values(WorksheetsTagsOptions);
 export const LESSON_TYPE_OPTIONS = Object.values(WorksheetsLessonTypeOptions);
 
+export const formatLessonType = (type?: string): string => {
+  if (!type) return '';
+  if (type === 'quiz-element') return 'Quiz (Legacy)';
+  if (type === 'tj-test' || type === 'test') return 'Test';
+  return type.charAt(0).toUpperCase() + type.slice(1).replace(/-/g, ' ');
+};
+
 export interface LessonRecord {
   id: string;
   collectionId: string;
@@ -361,6 +368,7 @@ declare module 'react' {
       'tj-speed-review': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
       'tj-pronunciation': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
       'tj-quiz-element': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      'tj-test': React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
     }
   }
 }

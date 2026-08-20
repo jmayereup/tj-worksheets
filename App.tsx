@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLessons, useLesson } from './hooks/useLessons';
-import { ParsedLesson, LANGUAGE_OPTIONS, LEVEL_OPTIONS, TAG_OPTIONS } from './types';
+import { ParsedLesson, LANGUAGE_OPTIONS, LEVEL_OPTIONS, TAG_OPTIONS, formatLessonType } from './types';
 import { LessonView } from './components/Lesson/LessonView';
 import { Button } from './components/UI/Button';
 import { BookOpen, Search, FlaskConical, Video, Feather, FileText, X, LogIn, LogOut, AlertTriangle, User, ChevronDown } from 'lucide-react';
@@ -473,7 +473,7 @@ const App: React.FC = () => {
                                                                 {l.language === 'English' ? 'EN' : l.language.substring(0, 2).toUpperCase()}-{l.level}
                                                             </span>
                                                             <span className="text-[11px] font-black tracking-wider text-blue-600 uppercase bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
-                                                                {l.lessonType.replace('-', ' ')}
+                                                                {formatLessonType(l.lessonType)}
                                                             </span>
                                                             <div className="h-1 w-1 rounded-full bg-gray-200"></div>
                                                             <span className="text-[11px] text-gray-400 font-medium">#{l.id.substring(0, 4)}</span>
