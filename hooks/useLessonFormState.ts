@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { LessonFormState, LessonFormActions, MediaState, MetadataState, UIState } from '../types/lessonEditor';
+import { fetchTeacherSubmissionUrl } from '../services/pocketbase';
 
 const initialMediaState: MediaState = {
   imageFile: null,
@@ -16,6 +17,7 @@ const initialMetadataState: MetadataState = {
   teacherCode: '',
   startCode: '',
   passThreshold: '75%',
+  submissionUrl: '',
   customConfig: {},
   testMode: false
 };
@@ -26,7 +28,12 @@ const initialUIState: UIState = {
   error: null
 };
 
-export const useLessonFormState = (lesson: any, lessonId: string | null, initialData?: any) => {
+export const useLessonFormState = (
+  lesson: any, 
+  lessonId: string | null, 
+  initialData?: any,
+  isPublicCreator: boolean = false
+) => {
   const [title, setTitle] = useState('');
   const [language, setLanguage] = useState('');
   const [level, setLevel] = useState('');
@@ -88,6 +95,7 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
         teacherCode: lesson.teacherCode || (isTest ? '7676' : '6767'),
         startCode: lesson.startCode || lesson.customConfig?.startCode || (isTest ? '6767' : ''),
         passThreshold: lesson.passThreshold || lesson.customConfig?.passThreshold || (isTest ? '75%' : ''),
+        submissionUrl: lesson.submissionUrl || lesson.customConfig?.submissionUrl || '',
         customConfig: lesson.customConfig || {},
         testMode: (lesson.customConfig?.testMode) || false
       });
@@ -117,6 +125,7 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
             teacherCode: initialData.teacherCode || (isTest ? '7676' : '6767'),
             startCode: initialData.startCode || initialData.customConfig?.startCode || (isTest ? '6767' : ''),
             passThreshold: initialData.passThreshold || initialData.customConfig?.passThreshold || (isTest ? '75%' : ''),
+            submissionUrl: initialData.submissionUrl || initialData.customConfig?.submissionUrl || '',
             customConfig: initialData.customConfig || {},
             testMode: (initialData.customConfig?.testMode) || false
           });
@@ -142,6 +151,25 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
       }
     }
   }, [lessonId, initialData]);
+
+  // For Admin ("Add New Worksheet" with no initial data), auto-populate the teacher's default GAS URL.
+  // For Create tab (isPublicCreator=true), this is skipped so submissionUrl starts empty.
+  useEffect(() => {
+    if (!isPublicCreator && !lessonId && !initialData) {
+      let cancelled = false;
+      fetchTeacherSubmissionUrl().then(url => {
+        if (!cancelled && url) {
+          setMetadataState(prev => {
+            if (!prev.submissionUrl) {
+              return { ...prev, submissionUrl: url };
+            }
+            return prev;
+          });
+        }
+      });
+      return () => { cancelled = true; };
+    }
+  }, [isPublicCreator, lessonId, initialData]);
 
   const resetForm = () => {
     setTitle('');

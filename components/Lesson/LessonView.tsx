@@ -283,7 +283,8 @@ export const LessonView: React.FC<Props> = ({ lesson, teacherCode, submissionUrl
           {(() => {
             const config = getComponentConfig(effectiveLessonType);
             if (!config) return null;
-            const { elementHtml } = buildPreviewElementHtml(lesson);
+            const effectiveSubUrl = submissionUrl || lesson.submissionUrl || lesson.customConfig?.submissionUrl;
+            const { elementHtml } = buildPreviewElementHtml(lesson, effectiveSubUrl);
             return <div dangerouslySetInnerHTML={{ __html: elementHtml }} />;
           })()}
         </div>

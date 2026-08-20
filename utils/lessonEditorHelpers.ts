@@ -60,6 +60,7 @@ export const buildLessonObject = (
   const effectiveTeacherCode = metadata.teacherCode || formState.teacherCode || (isTest ? '7676' : '6767');
   const effectivePassThreshold = metadata.passThreshold || formState.passThreshold || (isTest ? '75%' : '');
   const effectiveTestMode = Boolean(metadata.testMode ?? formState.testMode);
+  const effectiveSubmissionUrl = (metadata.submissionUrl ?? formState.submissionUrl ?? existingData?.submissionUrl ?? '').trim();
 
   let updatedContent = content;
   if (content && typeof content === 'object' && !Array.isArray(content)) {
@@ -83,10 +84,11 @@ export const buildLessonObject = (
   }
 
   const customConfig = {
-    ...(metadata.customConfig || formState.customConfig || {}),
+    ...(metadata.customConfig || formState.customConfig || existingData?.customConfig || {}),
     testMode: effectiveTestMode,
     ...(effectiveStartCode ? { startCode: effectiveStartCode } : {}),
-    ...(effectivePassThreshold ? { passThreshold: effectivePassThreshold } : {})
+    ...(effectivePassThreshold ? { passThreshold: effectivePassThreshold } : {}),
+    ...(effectiveSubmissionUrl ? { submissionUrl: effectiveSubmissionUrl } : {})
   };
 
   return {
@@ -104,6 +106,7 @@ export const buildLessonObject = (
     teacherCode: effectiveTeacherCode,
     startCode: effectiveStartCode,
     passThreshold: effectivePassThreshold,
+    submissionUrl: effectiveSubmissionUrl,
     customConfig,
     content: updatedContent,
     imageUrl: formState.imagePreview || existingData?.imageUrl,
@@ -132,6 +135,7 @@ export const generateFormData = (
   if (lesson.seo) formData.append('seo', lesson.seo);
   if (lesson.html) formData.append('html', lesson.html);
   if (lesson.teacherCode) formData.append('teacherCode', lesson.teacherCode);
+  if (lesson.submissionUrl) formData.append('submissionUrl', lesson.submissionUrl);
   if (lesson.customConfig) formData.append('customConfig', JSON.stringify(lesson.customConfig));
   if (lesson.content) formData.append('content', JSON.stringify(lesson.content));
   if (htmlCompiled) formData.append('htmlCompiled', htmlCompiled);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Video, ImageIcon, Music, ClipboardPaste, Info, EyeOff } from 'lucide-react';
+import { Video, ImageIcon, Music, ClipboardPaste, Info, EyeOff, Send } from 'lucide-react';
 import { Button } from '../../UI/Button';
 import { MediaState } from '../../../types/lessonEditor';
 
@@ -8,6 +8,7 @@ interface MediaSectionProps {
   teacherCode: string;
   startCode?: string;
   passThreshold?: string;
+  submissionUrl?: string;
   lessonType: string;
   testMode: boolean;
   isVideoLesson: boolean;
@@ -20,6 +21,7 @@ interface MediaSectionProps {
   onTeacherCodeChange: (code: string) => void;
   onStartCodeChange?: (code: string) => void;
   onPassThresholdChange?: (threshold: string) => void;
+  onSubmissionUrlChange?: (url: string) => void;
   onTestModeChange: (enabled: boolean) => void;
   onIsVideoLessonChange: (isVideo: boolean) => void;
   onNotForBlogChange?: (notForBlog: boolean) => void;
@@ -34,6 +36,7 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
   teacherCode,
   startCode = '',
   passThreshold = '75%',
+  submissionUrl = '',
   lessonType,
   testMode,
   isVideoLesson,
@@ -46,6 +49,7 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
   onTeacherCodeChange,
   onStartCodeChange,
   onPassThresholdChange,
+  onSubmissionUrlChange,
   onTestModeChange,
   onIsVideoLessonChange,
   onNotForBlogChange,
@@ -171,6 +175,29 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
           </div>
         </div>
       )}
+
+      <div>
+        <label className="block text-sm font-black text-gray-700 mb-2 ml-1 uppercase tracking-wider">
+          Submission URL (Google Apps Script)
+        </label>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+            <Send className="h-4 w-4 text-gray-400" />
+          </div>
+          <input
+            type="url"
+            value={submissionUrl}
+            onChange={(e) => onSubmissionUrlChange && onSubmissionUrlChange(e.target.value)}
+            className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none text-sm font-mono"
+            placeholder="https://script.google.com/macros/s/.../exec"
+          />
+        </div>
+        <p className="text-xs text-gray-400 mt-1 ml-1 font-medium">
+          {isPublicCreator 
+            ? 'Optional: Enter your Google Apps Script Web App URL to receive score submissions.' 
+            : 'Scores and responses will be submitted to this Google Apps Script Web App URL.'}
+        </p>
+      </div>
 
       {!isPublicCreator && (
         <>

@@ -302,7 +302,6 @@ export const fetchPaginatedLessons = async (
 const compileHtmlForRecord = async (record: any): Promise<string> => {
   const imageUrl = record.image ? getFileUrl(record, record.image) : undefined;
   const audioFileUrl = record.audioFile ? getFileUrl(record, record.audioFile) : undefined;
-  const submissionUrl = await fetchTeacherSubmissionUrl();
 
   const parseJSON = (val: any) => {
     if (typeof val === 'string') {
@@ -315,6 +314,9 @@ const compileHtmlForRecord = async (record: any): Promise<string> => {
     return val;
   };
 
+  const parsedConfig = parseJSON(record.customConfig);
+  const submissionUrl = record.submissionUrl || parsedConfig?.submissionUrl || await fetchTeacherSubmissionUrl();
+
   const lessonForCompile = {
     id: record.id,
     title: record.title,
@@ -326,7 +328,8 @@ const compileHtmlForRecord = async (record: any): Promise<string> => {
     lessonType: record.lessonType,
     seo: record.seo,
     teacherCode: record.teacherCode,
-    customConfig: parseJSON(record.customConfig),
+    submissionUrl: submissionUrl || undefined,
+    customConfig: parsedConfig,
     content: normalizeContent(record.content),
     imageUrl,
     audioFileUrl,

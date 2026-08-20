@@ -15,13 +15,18 @@ interface WebComponentPreviewProps {
 export const WebComponentPreview: React.FC<WebComponentPreviewProps> = ({ lesson, onClose }) => {
   const [activeTab, setActiveTab] = useState<'preview' | 'compiled-preview' | 'code'>('preview');
   const [copied, setCopied] = useState(false);
-  const [submissionUrl, setSubmissionUrl] = useState<string>('');
+  const [submissionUrl, setSubmissionUrl] = useState<string>(lesson.submissionUrl || lesson.customConfig?.submissionUrl || '');
 
   useEffect(() => {
     clearPreviewStorage();
   }, [lesson.id]);
 
   useEffect(() => {
+    const directUrl = lesson.submissionUrl || lesson.customConfig?.submissionUrl;
+    if (directUrl) {
+      setSubmissionUrl(directUrl);
+      return;
+    }
     let isCancelled = false;
     fetchTeacherSubmissionUrl().then(url => {
       if (!isCancelled && url) {
@@ -29,7 +34,7 @@ export const WebComponentPreview: React.FC<WebComponentPreviewProps> = ({ lesson
       }
     });
     return () => { isCancelled = true; };
-  }, []);
+  }, [lesson.submissionUrl, lesson.customConfig?.submissionUrl]);
 
   // Minimal lesson data for the embed script
   const embedData = JSON.stringify({
@@ -149,7 +154,10 @@ export const WebComponentPreview: React.FC<WebComponentPreviewProps> = ({ lesson
   const renderPreview = () => {
     if (!componentConfig) {
       return (
-        <tj-pocketbase-worksheet {...(submissionUrl ? { 'submission-url': submissionUrl } : {})}>
+        <tj-pocketbase-worksheet 
+          {...(lesson.teacherCode ? { code: lesson.teacherCode } : {})}
+          {...(submissionUrl ? { 'submission-url': submissionUrl } : {})}
+        >
           <script type="application/json">
             {embedData}
           </script>

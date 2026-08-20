@@ -38,7 +38,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
   const [jsonContent, setJsonContent] = React.useState('');
   const [error, setError] = React.useState<string | null>(null);
 
-  const { formState, actions } = useLessonFormState(lesson, lessonId, initialData);
+  const { formState, actions } = useLessonFormState(lesson, lessonId, initialData, isPublicCreator);
   const { media, handleImageFileChange, handleAudioFileChange, handlePasteImageFromClipboard } = useFileHandlers();
   
   const { liveDetection, isContentValid, isJsonContent, autoSEO, autoTitle } = useContentParsing(
@@ -162,6 +162,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
             teacherCode={formState.metadata.teacherCode}
             startCode={formState.metadata.startCode}
             passThreshold={formState.metadata.passThreshold}
+            submissionUrl={formState.metadata.submissionUrl}
             lessonType={formState.lessonType}
             testMode={formState.metadata.testMode}
             isVideoLesson={formState.isVideoLesson}
@@ -174,6 +175,7 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
             onTeacherCodeChange={(code) => actions.setMetadata({ teacherCode: code })}
             onStartCodeChange={(code) => actions.setMetadata({ startCode: code })}
             onPassThresholdChange={(threshold) => actions.setMetadata({ passThreshold: threshold })}
+            onSubmissionUrlChange={(url) => actions.setMetadata({ submissionUrl: url })}
             onTestModeChange={(enabled) => actions.setMetadata({ testMode: enabled })}
             onIsVideoLessonChange={actions.setIsVideoLesson}
             onNotForBlogChange={actions.setNotForBlog}

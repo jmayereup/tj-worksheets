@@ -162,12 +162,13 @@ export const compileLessonHtml = (lesson: any, rawHtml: string, overrideSubmissi
   const passThreshold = lesson.passThreshold || lesson.customConfig?.passThreshold || (isTest ? '75%' : '');
   const testMode = Boolean(lesson.customConfig?.testMode ?? lesson.testMode);
 
-  const submissionUrl = 
+  const submissionUrl = (
     overrideSubmissionUrl || 
     lesson.submissionUrl || 
     lesson.customConfig?.submissionUrl || 
-    (typeof process !== 'undefined' ? (process.env.VITE_GAS_SUBMISSION_URL || process.env.VITE_SUBMISSION_URL) : '') || 
-    '';
+    (typeof process !== 'undefined' ? (process.env?.VITE_GAS_SUBMISSION_URL || process.env?.VITE_SUBMISSION_URL) : '') || 
+    ''
+  ).trim();
 
   // 1. Build the interactive component HTML
   let elementHtml = '';
@@ -293,9 +294,10 @@ ${JSON.stringify(finalJsonContent, null, 2)}
     }, null, 2);
 
     const codeAttr = teacherCode ? ` code="${escapeHtml(teacherCode)}"` : '';
+    const submissionAttr = submissionUrl ? ` submission-url="${escapeHtml(submissionUrl)}"` : '';
 
     elementHtml = `<!-- TJ PocketBase Worksheet Web Component -->
-<tj-pocketbase-worksheet${codeAttr}>
+<tj-pocketbase-worksheet${codeAttr}${submissionAttr}>
   <script type="application/json">
 ${embedData}
   </script>
@@ -350,12 +352,13 @@ export const buildPreviewElementHtml = (
   const passThreshold = lesson.passThreshold || lesson.customConfig?.passThreshold || (isTest ? '75%' : '');
   const testMode = Boolean(lesson.customConfig?.testMode ?? lesson.testMode);
   const language = lesson.language || '';
-  const submissionUrl = 
+  const submissionUrl = (
     overrideSubmissionUrl || 
     lesson.submissionUrl || 
     lesson.customConfig?.submissionUrl || 
-    (typeof process !== 'undefined' ? (process.env.VITE_GAS_SUBMISSION_URL || process.env.VITE_SUBMISSION_URL) : '') || 
-    '';
+    (typeof process !== 'undefined' ? (process.env?.VITE_GAS_SUBMISSION_URL || process.env?.VITE_SUBMISSION_URL) : '') || 
+    ''
+  ).trim();
 
   const autoAttrs: AutoAttrs[] = [];
   if (isTest) {
