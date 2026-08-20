@@ -69,6 +69,12 @@ export const getCurrentUser = () => {
   return pb.authStore.record;
 };
 
+export { pb };
+
+export const getAuthToken = (): string => {
+  return pb.authStore.token || '';
+};
+
 export const isAuthenticated = () => {
   return pb.authStore.isValid;
 };
