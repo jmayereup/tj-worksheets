@@ -6,6 +6,8 @@ import { MediaState } from '../../../types/lessonEditor';
 interface MediaSectionProps {
   videoUrl: string;
   teacherCode: string;
+  startCode?: string;
+  passThreshold?: string;
   lessonType: string;
   testMode: boolean;
   isVideoLesson: boolean;
@@ -16,6 +18,8 @@ interface MediaSectionProps {
   existingAudioFileUrl?: string;
   onVideoUrlChange: (url: string) => void;
   onTeacherCodeChange: (code: string) => void;
+  onStartCodeChange?: (code: string) => void;
+  onPassThresholdChange?: (threshold: string) => void;
   onTestModeChange: (enabled: boolean) => void;
   onIsVideoLessonChange: (isVideo: boolean) => void;
   onNotForBlogChange?: (notForBlog: boolean) => void;
@@ -28,6 +32,8 @@ interface MediaSectionProps {
 export const MediaSection: React.FC<MediaSectionProps> = ({
   videoUrl,
   teacherCode,
+  startCode = '',
+  passThreshold = '75%',
   lessonType,
   testMode,
   isVideoLesson,
@@ -38,6 +44,8 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
   existingAudioFileUrl,
   onVideoUrlChange,
   onTeacherCodeChange,
+  onStartCodeChange,
+  onPassThresholdChange,
   onTestModeChange,
   onIsVideoLessonChange,
   onNotForBlogChange,
@@ -46,6 +54,8 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
   onPasteImageFromClipboard,
   onRemoveNewAudio
 }) => {
+  const isTest = ['quiz-element', 'tj-test', 'test'].includes(lessonType);
+
   return (
     <div className="space-y-6">
       <div>
@@ -64,7 +74,87 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
         </div>
       </div>
 
-      <div className={['quiz-element', 'tj-test', 'test'].includes(lessonType) ? "grid grid-cols-1 md:grid-cols-2 gap-4" : ""}>
+      {isTest ? (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-black text-gray-700 mb-2 ml-1 uppercase tracking-wider">Start Code</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <span className="text-gray-400 font-bold text-sm">#</span>
+                </div>
+                <input
+                  type="text"
+                  value={startCode}
+                  onChange={(e) => onStartCodeChange && onStartCodeChange(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none"
+                  placeholder="6767 (Default)"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-black text-gray-700 mb-2 ml-1 uppercase tracking-wider">Teacher Code</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <span className="text-gray-400 font-bold text-sm">#</span>
+                </div>
+                <input
+                  type="text"
+                  value={teacherCode}
+                  onChange={(e) => onTeacherCodeChange(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none"
+                  placeholder="7676 (Default)"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-black text-gray-700 mb-2 ml-1 uppercase tracking-wider">
+                {lessonType === 'quiz-element' ? 'Quiz Settings (Legacy)' : 'Test Settings'}
+              </label>
+              <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl min-h-[50px]">
+                <div className="flex flex-col">
+                  <span className="text-sm font-bold text-gray-800">Test Mode</span>
+                  <span className="text-xs text-gray-400">
+                    {lessonType === 'quiz-element' ? 'Lock quiz behind Start Code' : 'Lock test behind Start / Teacher Code'}
+                  </span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={testMode} 
+                    onChange={(e) => onTestModeChange(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-black text-gray-700 mb-2 ml-1 uppercase tracking-wider">Pass Threshold</label>
+              <select
+                value={passThreshold || '75%'}
+                onChange={(e) => onPassThresholdChange && onPassThresholdChange(e.target.value)}
+                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none text-sm font-bold text-gray-800"
+              >
+                <option value="0%">Disabled (0% - No minimum)</option>
+                <option value="50%">50%</option>
+                <option value="60%">60%</option>
+                <option value="70%">70%</option>
+                <option value="75%">75% (Default)</option>
+                <option value="80%">80%</option>
+                <option value="85%">85%</option>
+                <option value="90%">90%</option>
+                <option value="100%">100%</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      ) : (
         <div>
           <label className="block text-sm font-black text-gray-700 mb-2 ml-1 uppercase tracking-wider">Teacher Code</label>
           <div className="relative">
@@ -80,32 +170,7 @@ export const MediaSection: React.FC<MediaSectionProps> = ({
             />
           </div>
         </div>
-
-        {['quiz-element', 'tj-test', 'test'].includes(lessonType) && (
-          <div>
-            <label className="block text-sm font-black text-gray-700 mb-2 ml-1 uppercase tracking-wider">
-              {lessonType === 'quiz-element' ? 'Quiz Settings (Legacy)' : 'Test Settings'}
-            </label>
-            <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl min-h-[50px]">
-              <div className="flex flex-col">
-                <span className="text-sm font-bold text-gray-800">Test Mode</span>
-                <span className="text-xs text-gray-400">
-                  {lessonType === 'quiz-element' ? 'Lock quiz behind Teacher Code' : 'Lock test behind Start / Teacher Code'}
-                </span>
-              </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input 
-                  type="checkbox" 
-                  checked={testMode} 
-                  onChange={(e) => onTestModeChange(e.target.checked)}
-                  className="sr-only peer"
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-600"></div>
-              </label>
-            </div>
-          </div>
-        )}
-      </div>
+      )}
 
       {!isPublicCreator && (
         <>

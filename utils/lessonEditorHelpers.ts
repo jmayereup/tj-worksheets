@@ -54,6 +54,40 @@ export const buildLessonObject = (
   idOverride?: string,
   existingData?: any
 ): LessonObjectData => {
+  const isTest = ['tj-test', 'test', 'quiz-element'].includes(formState.lessonType);
+  const effectiveStartCode = formState.startCode || (isTest ? '6767' : '');
+  const effectiveTeacherCode = formState.teacherCode || (isTest ? '7676' : '6767');
+  const effectivePassThreshold = formState.passThreshold || (isTest ? '75%' : '');
+  const effectiveTestMode = Boolean(formState.testMode);
+
+  let updatedContent = content;
+  if (content && typeof content === 'object' && !Array.isArray(content)) {
+    updatedContent = { ...content };
+    if (isTest) {
+      updatedContent.startCode = effectiveStartCode;
+      updatedContent.teacherCode = effectiveTeacherCode;
+      updatedContent.testMode = effectiveTestMode;
+      if (effectivePassThreshold) {
+        updatedContent.passThreshold = effectivePassThreshold;
+      }
+      if ('start-code' in updatedContent) updatedContent['start-code'] = effectiveStartCode;
+      if ('start_code' in updatedContent) updatedContent['start_code'] = effectiveStartCode;
+      if ('teacher-code' in updatedContent) updatedContent['teacher-code'] = effectiveTeacherCode;
+      if ('teacher_code' in updatedContent) updatedContent['teacher_code'] = effectiveTeacherCode;
+      if ('test-mode' in updatedContent) updatedContent['test-mode'] = effectiveTestMode;
+      if ('test_mode' in updatedContent) updatedContent['test_mode'] = effectiveTestMode;
+      if ('pass-threshold' in updatedContent) updatedContent['pass-threshold'] = effectivePassThreshold;
+      if ('pass_threshold' in updatedContent) updatedContent['pass_threshold'] = effectivePassThreshold;
+    }
+  }
+
+  const customConfig = {
+    ...formState.customConfig,
+    testMode: effectiveTestMode,
+    ...(effectiveStartCode ? { startCode: effectiveStartCode } : {}),
+    ...(effectivePassThreshold ? { passThreshold: effectivePassThreshold } : {})
+  };
+
   return {
     id: idOverride || undefined,
     title: formState.title,
@@ -66,9 +100,11 @@ export const buildLessonObject = (
     lessonType: formState.lessonType,
     seo: formState.seo,
     html: formState.html,
-    teacherCode: formState.teacherCode,
-    customConfig: { ...formState.customConfig, testMode: formState.testMode },
-    content,
+    teacherCode: effectiveTeacherCode,
+    startCode: effectiveStartCode,
+    passThreshold: effectivePassThreshold,
+    customConfig,
+    content: updatedContent,
     imageUrl: formState.imagePreview || existingData?.imageUrl,
     audioFileUrl: existingData?.audioFileUrl,
     created: existingData?.created || new Date().toISOString(),
@@ -180,4 +216,40 @@ export const syncTitleFromContent = (
   }
   
   return null;
+};
+
+export const clearPreviewStorage = (): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    if (window.localStorage) {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (!key) continue;
+        // Never remove PocketBase auth tokens or core admin credentials
+        if (key.startsWith('pocketbase') || key.startsWith('pb_')) continue;
+
+        if (
+          key.startsWith('lesson-progress-') ||
+          key.startsWith('tj-') ||
+          key.startsWith('tj_') ||
+          key.startsWith('quiz-') ||
+          key.startsWith('test-')
+        ) {
+          keysToRemove.push(key);
+        }
+      }
+      keysToRemove.forEach(k => localStorage.removeItem(k));
+    }
+  } catch (e) {
+    console.warn('Could not clear preview localStorage:', e);
+  }
+
+  try {
+    if (window.sessionStorage) {
+      sessionStorage.clear();
+    }
+  } catch (e) {
+    console.warn('Could not clear preview sessionStorage:', e);
+  }
 };

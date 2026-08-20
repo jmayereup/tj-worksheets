@@ -301,6 +301,9 @@ export interface LessonRecord {
   html?: string;
   htmlCompiled?: string;
   teacherCode?: string;
+  startCode?: string;
+  passThreshold?: string;
+  testMode?: boolean;
   submissionUrl?: string;
   customConfig?: any;
 }

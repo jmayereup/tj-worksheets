@@ -17,6 +17,8 @@ export interface MetadataState {
   seo: string;
   html: string;
   teacherCode: string;
+  startCode: string;
+  passThreshold: string;
   customConfig: Record<string, any>;
   testMode: boolean;
 }
@@ -76,6 +78,8 @@ export interface LessonObjectData {
   seo: string;
   html: string;
   teacherCode: string;
+  startCode?: string;
+  passThreshold?: string;
   customConfig: Record<string, any>;
   content: any;
   imageUrl?: string;

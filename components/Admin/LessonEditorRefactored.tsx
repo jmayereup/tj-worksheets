@@ -160,6 +160,8 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
           <MediaSection
             videoUrl={formState.videoUrl}
             teacherCode={formState.metadata.teacherCode}
+            startCode={formState.metadata.startCode}
+            passThreshold={formState.metadata.passThreshold}
             lessonType={formState.lessonType}
             testMode={formState.metadata.testMode}
             isVideoLesson={formState.isVideoLesson}
@@ -170,6 +172,8 @@ export const LessonEditor: React.FC<LessonEditorProps> = ({
             existingAudioFileUrl={lesson?.audioFileUrl}
             onVideoUrlChange={actions.setVideoUrl}
             onTeacherCodeChange={(code) => actions.setMetadata({ teacherCode: code })}
+            onStartCodeChange={(code) => actions.setMetadata({ startCode: code })}
+            onPassThresholdChange={(threshold) => actions.setMetadata({ passThreshold: threshold })}
             onTestModeChange={(enabled) => actions.setMetadata({ testMode: enabled })}
             onIsVideoLessonChange={actions.setIsVideoLesson}
             onNotForBlogChange={actions.setNotForBlog}

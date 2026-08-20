@@ -4,7 +4,7 @@ import { Button } from '../UI/Button';
 import { ParsedLesson } from '../../types';
 import { getComponentConfig } from '../../utils/componentMapper';
 import { compileLessonHtml, buildPreviewElementHtml } from '../../utils/htmlCompiler';
-
+import { clearPreviewStorage } from '../../utils/lessonEditorHelpers';
 import { fetchTeacherSubmissionUrl } from '../../services/pocketbase';
 
 interface WebComponentPreviewProps {
@@ -16,6 +16,10 @@ export const WebComponentPreview: React.FC<WebComponentPreviewProps> = ({ lesson
   const [activeTab, setActiveTab] = useState<'preview' | 'compiled-preview' | 'code'>('preview');
   const [copied, setCopied] = useState(false);
   const [submissionUrl, setSubmissionUrl] = useState<string>('');
+
+  useEffect(() => {
+    clearPreviewStorage();
+  }, [lesson.id]);
 
   useEffect(() => {
     let isCancelled = false;

@@ -6,7 +6,8 @@ import {
   generateFormData, 
   downloadLessonAsJSON, 
   downloadLessonAsHTML, 
-  generateEmbedCode 
+  generateEmbedCode,
+  clearPreviewStorage
 } from '../utils/lessonEditorHelpers';
 import { VALIDATION_MESSAGES, getGeminiUrl } from '../config/lessonEditor';
 import { LessonObjectData, MediaState } from '../types/lessonEditor';
@@ -39,6 +40,8 @@ export const useLessonActions = ({
 
   const handlePreview = useCallback(() => {
     try {
+      clearPreviewStorage();
+
       const parsedResult = parseContentWithValidation(jsonContent, formState.title);
       if (!parsedResult.isValid) {
         onError(parsedResult.error || VALIDATION_MESSAGES.CANNOT_PREVIEW_INVALID);

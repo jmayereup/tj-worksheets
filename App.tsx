@@ -8,6 +8,7 @@ import { BrowserSupportWarning } from './components/UI/BrowserSupportWarning';
 import { AdminDashboard } from './components/Admin/AdminDashboard';
 import { LessonEditor } from './components/Admin/LessonEditorRefactored';
 import { WebComponentPreview } from './components/Lesson/WebComponentPreview';
+import { clearPreviewStorage } from './utils/lessonEditorHelpers';
 import { SearchableSelect } from './components/UI/SearchableSelect';
 import { LoginForm } from './components/Admin/LoginForm';
 import { isAuthenticated, isAdmin, requireAdmin, logout, getCurrentUser } from './services/pocketbase';
@@ -328,6 +329,7 @@ const App: React.FC = () => {
                             onSave={() => handleViewChange('home')} 
                             onCancel={() => handleViewChange('home')} 
                             onPreview={(lesson) => {
+                                clearPreviewStorage();
                                 setCurrentLesson(lesson);
                                 setShowPreview(true);
                             }}
@@ -525,6 +527,7 @@ const App: React.FC = () => {
                     <AdminDashboard 
                         onBack={() => handleViewChange('home')} 
                         onPreview={(lesson) => {
+                            clearPreviewStorage();
                             setCurrentLesson(lesson);
                             setShowPreview(true);
                         }}
@@ -549,6 +552,7 @@ const App: React.FC = () => {
 
             {showPreview && currentLesson && (
                 <WebComponentPreview 
+                    key={currentLesson.id || String(Date.now())}
                     lesson={currentLesson} 
                     onClose={() => setShowPreview(false)} 
                 />

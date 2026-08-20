@@ -115,9 +115,38 @@ export const LessonView: React.FC<Props> = ({ lesson, teacherCode, submissionUrl
       const elements = containerRef.current.querySelectorAll('*');
       elements.forEach(el => {
         // Skip the main worksheet wrapper tag itself to avoid infinite setting loop
-        if (el.tagName.includes('-') && el.tagName.toLowerCase() !== 'tj-pocketbase-worksheet') {
-          el.setAttribute('code', effectiveCode);
-          (el as any).code = effectiveCode;
+        const tag = el.tagName.toLowerCase();
+        if (el.tagName.includes('-') && tag !== 'tj-pocketbase-worksheet') {
+          if (tag === 'tj-test' || tag === 'tj-quiz-element') {
+            const isTest = true;
+            const startCode = (lesson.startCode || lesson.customConfig?.startCode || (isTest ? '6767' : '')).trim();
+            const teachCode = (teacherCode || lesson.teacherCode || (isTest ? '7676' : '6767')).trim();
+            const passThresh = (lesson.passThreshold || lesson.customConfig?.passThreshold || (isTest ? '75%' : '')).trim();
+            const testMode = Boolean(lesson.customConfig?.testMode ?? lesson.testMode);
+
+            if (startCode) {
+              el.setAttribute('start-code', startCode);
+              (el as any).startCode = startCode;
+            }
+            if (teachCode) {
+              el.setAttribute('teacher-code', teachCode);
+              (el as any).teacherCode = teachCode;
+            }
+            if (passThresh) {
+              el.setAttribute('pass-threshold', passThresh);
+              (el as any).passThreshold = passThresh;
+            }
+            if (testMode) {
+              el.setAttribute('test-mode', '');
+              (el as any).testMode = true;
+            } else {
+              el.removeAttribute('test-mode');
+              (el as any).testMode = false;
+            }
+          } else {
+            el.setAttribute('code', effectiveCode);
+            (el as any).code = effectiveCode;
+          }
 
           const effectiveUrl = (submissionUrl || lesson.submissionUrl || lesson.customConfig?.submissionUrl || subUrl || '').trim();
           if (effectiveUrl) {

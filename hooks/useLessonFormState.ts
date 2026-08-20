@@ -8,10 +8,14 @@ const initialMediaState: MediaState = {
   imagePreview: null
 };
 
+const isTestLessonType = (type: string) => ['tj-test', 'test', 'quiz-element'].includes(type);
+
 const initialMetadataState: MetadataState = {
   seo: '',
   html: '',
   teacherCode: '',
+  startCode: '',
+  passThreshold: '75%',
   customConfig: {},
   testMode: false
 };
@@ -30,7 +34,7 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
   const [videoUrl, setVideoUrl] = useState('');
   const [isVideoLesson, setIsVideoLesson] = useState(false);
   const [notForBlog, setNotForBlog] = useState(false);
-  const [lessonType, setLessonType] = useState('');
+  const [lessonType, setLessonTypeState] = useState('');
   
   const [media, setMediaState] = useState<MediaState>(initialMediaState);
   const [metadata, setMetadataState] = useState<MetadataState>(initialMetadataState);
@@ -48,8 +52,27 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
     setUIState(prev => ({ ...prev, ...updates }));
   };
 
+  const setLessonType = (newType: string) => {
+    setLessonTypeState(newType);
+    if (isTestLessonType(newType)) {
+      setMetadataState(prev => ({
+        ...prev,
+        startCode: prev.startCode || '6767',
+        teacherCode: (!prev.teacherCode || prev.teacherCode === '6767') ? '7676' : prev.teacherCode,
+        passThreshold: prev.passThreshold || '75%'
+      }));
+    } else {
+      setMetadataState(prev => ({
+        ...prev,
+        teacherCode: prev.teacherCode === '7676' ? '6767' : prev.teacherCode
+      }));
+    }
+  };
+
   useEffect(() => {
     if (lesson) {
+      const type = lesson.lessonType || 'worksheet';
+      const isTest = isTestLessonType(type);
       setTitle(lesson.title || '');
       setLanguage(lesson.language);
       setLevel(lesson.level);
@@ -57,12 +80,14 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
       setVideoUrl(lesson.videoUrl || '');
       setIsVideoLesson(lesson.isVideoLesson || false);
       setNotForBlog(lesson.notForBlog || false);
-      setLessonType(lesson.lessonType || 'worksheet');
+      setLessonTypeState(type);
       
       setMetadata({
         seo: lesson.seo || '',
         html: lesson.html || '',
-        teacherCode: lesson.teacherCode || '',
+        teacherCode: lesson.teacherCode || (isTest ? '7676' : '6767'),
+        startCode: lesson.startCode || lesson.customConfig?.startCode || (isTest ? '6767' : ''),
+        passThreshold: lesson.passThreshold || lesson.customConfig?.passThreshold || (isTest ? '75%' : ''),
         customConfig: lesson.customConfig || {},
         testMode: (lesson.customConfig?.testMode) || false
       });
@@ -80,14 +105,18 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
     if (!lessonId) {
       if (initialData) {
         try {
+          const type = initialData.lessonType || '';
+          const isTest = isTestLessonType(type);
           setTitle(initialData.title || '');
-          setLessonType(initialData.lessonType || '');
+          setLessonTypeState(type);
           setNotForBlog(initialData.notForBlog || false);
           
           setMetadata({
             seo: initialData.seo || '',
             html: initialData.html || '',
-            teacherCode: initialData.teacherCode || '',
+            teacherCode: initialData.teacherCode || (isTest ? '7676' : '6767'),
+            startCode: initialData.startCode || initialData.customConfig?.startCode || (isTest ? '6767' : ''),
+            passThreshold: initialData.passThreshold || initialData.customConfig?.passThreshold || (isTest ? '75%' : ''),
             customConfig: initialData.customConfig || {},
             testMode: (initialData.customConfig?.testMode) || false
           });
@@ -101,7 +130,7 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
         }
       } else {
         setTitle('');
-        setLessonType('');
+        setLessonTypeState('');
         setLanguage('');
         setLevel('');
         setSelectedTags([]);
@@ -122,7 +151,7 @@ export const useLessonFormState = (lesson: any, lessonId: string | null, initial
     setVideoUrl('');
     setIsVideoLesson(false);
     setNotForBlog(false);
-    setLessonType('');
+    setLessonTypeState('');
     setMetadata(initialMetadataState);
     setMedia(initialMediaState);
     setUI(initialUIState);

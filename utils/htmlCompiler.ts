@@ -27,17 +27,73 @@ const buildCustomElementHtml = (
   innerHtml: string,
   autoAttrs: AutoAttrs[]
 ): string => {
-  const existingAttrNames = new Set(attrs.map(a => a.name.toLowerCase()));
-  const attrParts: string[] = [];
-
-  // Preserve user-provided attributes in their original order
-  for (const attr of attrs) {
-    attrParts.push(`${attr.name}="${escapeAttr(attr.value)}"`);
+  const autoAttrMap = new Map<string, AutoAttrs>();
+  for (const a of autoAttrs) {
+    autoAttrMap.set(a.name.toLowerCase(), a);
   }
 
-  // Append auto-attrs that the user didn't provide (dedup, case-insensitive)
+  const processedAttrNames = new Set<string>();
+  const attrParts: string[] = [];
+  const isTest = tagName.toLowerCase() === 'tj-test' || tagName.toLowerCase() === 'tj-quiz-element';
+
+  // 1. Process user-provided attributes in order, replacing with autoAttrs if matched or updating test aliases
+  for (const attr of attrs) {
+    const lowerName = attr.name.toLowerCase();
+    processedAttrNames.add(lowerName);
+
+    if (isTest) {
+      if (['start-code', 'start_code', 'start-quiz-code'].includes(lowerName)) {
+        processedAttrNames.add('start-code');
+        const auto = autoAttrMap.get('start-code');
+        if (auto && auto.value) {
+          attrParts.push(`start-code="${escapeAttr(auto.value)}"`);
+        }
+        continue;
+      }
+      if (['teacher-code', 'teacher_code', 'submit-code', 'submit_code', 'reset-code', 'reset_code'].includes(lowerName)) {
+        processedAttrNames.add('teacher-code');
+        const auto = autoAttrMap.get('teacher-code');
+        if (auto && auto.value) {
+          attrParts.push(`teacher-code="${escapeAttr(auto.value)}"`);
+        }
+        continue;
+      }
+      if (['pass-threshold', 'pass_threshold'].includes(lowerName)) {
+        processedAttrNames.add('pass-threshold');
+        const auto = autoAttrMap.get('pass-threshold');
+        if (auto && auto.value) {
+          attrParts.push(`pass-threshold="${escapeAttr(auto.value)}"`);
+        }
+        continue;
+      }
+      if (['test-mode', 'practice-mode'].includes(lowerName)) {
+        processedAttrNames.add('test-mode');
+        const auto = autoAttrMap.get('test-mode');
+        if (auto && auto.boolean) {
+          attrParts.push('test-mode');
+        }
+        continue;
+      }
+    }
+
+    if (autoAttrMap.has(lowerName)) {
+      const auto = autoAttrMap.get(lowerName)!;
+      if (auto.boolean) {
+        if (auto.value === '' || auto.value === 'true' || auto.value === '1') {
+          attrParts.push(auto.name);
+        }
+      } else if (auto.value != null && auto.value !== '') {
+        attrParts.push(`${auto.name}="${escapeAttr(auto.value)}"`);
+      }
+    } else {
+      attrParts.push(`${attr.name}="${escapeAttr(attr.value)}"`);
+    }
+  }
+
+  // 2. Append auto-attrs that were not already in attrs
   for (const attr of autoAttrs) {
-    if (existingAttrNames.has(attr.name.toLowerCase())) continue;
+    const lowerName = attr.name.toLowerCase();
+    if (processedAttrNames.has(lowerName)) continue;
     if (attr.boolean) {
       if (attr.value === '' || attr.value === 'true' || attr.value === '1') {
         attrParts.push(attr.name);
@@ -48,15 +104,64 @@ const buildCustomElementHtml = (
   }
 
   const attrString = attrParts.length ? ' ' + attrParts.join(' ') : '';
-  return `<${tagName}${attrString}>\n  ${innerHtml}\n</${tagName}>`;
+
+  // 3. Overwrite embedded JSON inside innerHtml if present for test types
+  let finalInnerHtml = innerHtml;
+  if (isTest) {
+    const startCodeVal = autoAttrMap.get('start-code')?.value;
+    const teacherCodeVal = autoAttrMap.get('teacher-code')?.value;
+    const passThresholdVal = autoAttrMap.get('pass-threshold')?.value;
+    const testModeVal = Boolean(autoAttrMap.get('test-mode')?.boolean);
+
+    finalInnerHtml = finalInnerHtml.replace(
+      /(<script\b[^>]*type=["']application\/json["'][^>]*>)([\s\S]*?)(<\/script>)/i,
+      (_, openTag, jsonStr, closeTag) => {
+        try {
+          const parsed = JSON.parse(jsonStr);
+          if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+            if (startCodeVal) {
+              parsed.startCode = startCodeVal;
+              if ('start-code' in parsed) parsed['start-code'] = startCodeVal;
+              if ('start_code' in parsed) parsed['start_code'] = startCodeVal;
+            }
+            if (teacherCodeVal) {
+              parsed.teacherCode = teacherCodeVal;
+              if ('teacher-code' in parsed) parsed['teacher-code'] = teacherCodeVal;
+              if ('teacher_code' in parsed) parsed['teacher_code'] = teacherCodeVal;
+            }
+            if (passThresholdVal) {
+              parsed.passThreshold = passThresholdVal;
+              if ('pass-threshold' in parsed) parsed['pass-threshold'] = passThresholdVal;
+              if ('pass_threshold' in parsed) parsed['pass_threshold'] = passThresholdVal;
+            }
+            parsed.testMode = testModeVal;
+            if ('test-mode' in parsed) parsed['test-mode'] = testModeVal;
+            if ('test_mode' in parsed) parsed['test_mode'] = testModeVal;
+
+            return `${openTag}\n${JSON.stringify(parsed, null, 2)}\n  ${closeTag}`;
+          }
+        } catch {
+          // ignore parsing error
+        }
+        return `${openTag}${jsonStr}${closeTag}`;
+      }
+    );
+  }
+
+  return `<${tagName}${attrString}>\n  ${finalInnerHtml}\n</${tagName}>`;
 };
 
 export const compileLessonHtml = (lesson: any, rawHtml: string, overrideSubmissionUrl?: string): string => {
   const componentConfig = getComponentConfig(lesson.lessonType);
   const title = lesson.title || 'Interactive Worksheet';
   const description = lesson.seo || '';
-  const teacherCode = lesson.teacherCode || '';
   const language = lesson.language || '';
+  const isTest = ['tj-test', 'test', 'quiz-element'].includes(lesson.lessonType);
+  const startCode = lesson.startCode || lesson.customConfig?.startCode || (isTest ? '6767' : '');
+  const teacherCode = lesson.teacherCode || (isTest ? '7676' : '6767');
+  const passThreshold = lesson.passThreshold || lesson.customConfig?.passThreshold || (isTest ? '75%' : '');
+  const testMode = Boolean(lesson.customConfig?.testMode ?? lesson.testMode);
+
   const submissionUrl = 
     overrideSubmissionUrl || 
     lesson.submissionUrl || 
@@ -68,9 +173,22 @@ export const compileLessonHtml = (lesson: any, rawHtml: string, overrideSubmissi
   let elementHtml = '';
   if (componentConfig) {
     const autoAttrs: AutoAttrs[] = [];
-    if (teacherCode) {
-      autoAttrs.push({ name: 'code', value: teacherCode });
+    if (isTest) {
+      if (startCode) {
+        autoAttrs.push({ name: 'start-code', value: startCode });
+      }
+      if (teacherCode) {
+        autoAttrs.push({ name: 'teacher-code', value: teacherCode });
+      }
+      if (passThreshold) {
+        autoAttrs.push({ name: 'pass-threshold', value: passThreshold });
+      }
+    } else {
+      if (teacherCode) {
+        autoAttrs.push({ name: 'code', value: teacherCode });
+      }
     }
+
     if (submissionUrl) {
       autoAttrs.push({ name: 'submission-url', value: submissionUrl });
     }
@@ -83,7 +201,7 @@ export const compileLessonHtml = (lesson: any, rawHtml: string, overrideSubmissi
       autoAttrs.push({ name: 'audio-listening', value: lesson.audioFileUrl });
     }
 
-    if (lesson.customConfig?.testMode) {
+    if (testMode) {
       autoAttrs.push({ name: 'test-mode', value: '', boolean: true });
     }
 
@@ -124,10 +242,29 @@ ${lesson.content}
 
 <script src="${componentConfig.script}" type="module" defer></script>`;
     } else {
+      let finalJsonContent = lesson.content;
+      if (finalJsonContent && typeof finalJsonContent === 'object' && !Array.isArray(finalJsonContent)) {
+        finalJsonContent = { ...finalJsonContent };
+        if (isTest) {
+          finalJsonContent.startCode = startCode;
+          finalJsonContent.teacherCode = teacherCode;
+          finalJsonContent.testMode = testMode;
+          if (passThreshold) finalJsonContent.passThreshold = passThreshold;
+          if ('start-code' in finalJsonContent) finalJsonContent['start-code'] = startCode;
+          if ('start_code' in finalJsonContent) finalJsonContent['start_code'] = startCode;
+          if ('teacher-code' in finalJsonContent) finalJsonContent['teacher-code'] = teacherCode;
+          if ('teacher_code' in finalJsonContent) finalJsonContent['teacher_code'] = teacherCode;
+          if ('test-mode' in finalJsonContent) finalJsonContent['test-mode'] = testMode;
+          if ('test_mode' in finalJsonContent) finalJsonContent['test_mode'] = testMode;
+          if ('pass-threshold' in finalJsonContent) finalJsonContent['pass-threshold'] = passThreshold;
+          if ('pass_threshold' in finalJsonContent) finalJsonContent['pass_threshold'] = passThreshold;
+        }
+      }
+
       elementHtml = `<!-- TJ ${componentConfig.tag} Component -->
 <${componentConfig.tag} ${autoAttrs.filter(a => !a.boolean).map(a => `${a.name}="${escapeHtml(a.value ?? '')}"`).join(' ')}${autoAttrs.some(a => a.boolean) ? ' ' + autoAttrs.filter(a => a.boolean).map(a => a.name).join(' ') : ''}>
   <script type="application/json">
-${JSON.stringify(lesson.content, null, 2)}
+${JSON.stringify(finalJsonContent, null, 2)}
   </script>
 </${componentConfig.tag}>
 
@@ -151,7 +288,7 @@ ${JSON.stringify(lesson.content, null, 2)}
       lessonType: lesson.lessonType,
       creatorId: lesson.creatorId,
       seo: lesson.seo,
-      html: rawHtml, // Include raw instructions in the JSON payload
+      html: rawHtml,
       customConfig: lesson.customConfig
     }, null, 2);
 
@@ -173,13 +310,9 @@ ${embedData}
   if (placeholderRegex.test(rawHtml)) {
     bodyHtml = rawHtml.replace(placeholderRegex, elementHtml);
   } else {
-    // If no placeholder is found, append it at the end
     bodyHtml = `${rawHtml}\n${elementHtml}`;
   }
 
-  // 3. Wrap it in a clean article wrapper that matches standard styling and links the stylesheet
-  // Components that internally render their own header (such as tj-pocketbase-worksheet and tj-chapter-book)
-  // do not need an external static header to avoid duplicate headers.
   const isSelfHeaderComponent = !componentConfig || componentConfig.tag === 'tj-chapter-book' || componentConfig.tag === 'tj-pocketbase-worksheet';
   const headerHtml = isSelfHeaderComponent ? '' : `\n  <header class="tj-worksheet-header mb-6 text-center">
     <h1 class="text-3xl font-black text-green-900 tracking-tight mb-2">${escapeHtml(title)}</h1>
@@ -211,7 +344,11 @@ export const buildPreviewElementHtml = (
     return { elementHtml: '', contentMode: 'json' };
   }
 
-  const teacherCode = lesson.teacherCode || '';
+  const isTest = ['tj-test', 'test', 'quiz-element'].includes(lesson.lessonType);
+  const startCode = lesson.startCode || lesson.customConfig?.startCode || (isTest ? '6767' : '');
+  const teacherCode = lesson.teacherCode || (isTest ? '7676' : '6767');
+  const passThreshold = lesson.passThreshold || lesson.customConfig?.passThreshold || (isTest ? '75%' : '');
+  const testMode = Boolean(lesson.customConfig?.testMode ?? lesson.testMode);
   const language = lesson.language || '';
   const submissionUrl = 
     overrideSubmissionUrl || 
@@ -221,9 +358,22 @@ export const buildPreviewElementHtml = (
     '';
 
   const autoAttrs: AutoAttrs[] = [];
-  if (teacherCode) {
-    autoAttrs.push({ name: 'code', value: teacherCode });
+  if (isTest) {
+    if (startCode) {
+      autoAttrs.push({ name: 'start-code', value: startCode });
+    }
+    if (teacherCode) {
+      autoAttrs.push({ name: 'teacher-code', value: teacherCode });
+    }
+    if (passThreshold) {
+      autoAttrs.push({ name: 'pass-threshold', value: passThreshold });
+    }
+  } else {
+    if (teacherCode) {
+      autoAttrs.push({ name: 'code', value: teacherCode });
+    }
   }
+
   if (submissionUrl) {
     autoAttrs.push({ name: 'submission-url', value: submissionUrl });
   }
@@ -234,7 +384,7 @@ export const buildPreviewElementHtml = (
   } else if (lesson.lessonType === 'listening' && lesson.audioFileUrl) {
     autoAttrs.push({ name: 'audio-listening', value: lesson.audioFileUrl });
   }
-  if (lesson.customConfig?.testMode) {
+  if (testMode) {
     autoAttrs.push({ name: 'test-mode', value: '', boolean: true });
   }
 
@@ -265,9 +415,30 @@ export const buildPreviewElementHtml = (
     };
   }
 
+  let finalJsonContent = lesson.content;
+  if (finalJsonContent && typeof finalJsonContent === 'object' && !Array.isArray(finalJsonContent)) {
+    finalJsonContent = { ...finalJsonContent };
+    if (isTest) {
+      finalJsonContent.startCode = startCode;
+      finalJsonContent.teacherCode = teacherCode;
+      finalJsonContent.testMode = testMode;
+      if (passThreshold) finalJsonContent.passThreshold = passThreshold;
+      if ('start-code' in finalJsonContent) finalJsonContent['start-code'] = startCode;
+      if ('start_code' in finalJsonContent) finalJsonContent['start_code'] = startCode;
+      if ('teacher-code' in finalJsonContent) finalJsonContent['teacher-code'] = teacherCode;
+      if ('teacher_code' in finalJsonContent) finalJsonContent['teacher_code'] = teacherCode;
+      if ('test-mode' in finalJsonContent) finalJsonContent['test-mode'] = testMode;
+      if ('test_mode' in finalJsonContent) finalJsonContent['test_mode'] = testMode;
+      if ('pass-threshold' in finalJsonContent) finalJsonContent['pass-threshold'] = passThreshold;
+      if ('pass_threshold' in finalJsonContent) finalJsonContent['pass_threshold'] = passThreshold;
+    }
+  }
+
   return {
     elementHtml: `<${componentConfig.tag}${baseAttrString ? ' ' + baseAttrString : ''}>
-  ${JSON.stringify(lesson.content)}
+  <script type="application/json">
+${JSON.stringify(finalJsonContent, null, 2)}
+  </script>
 </${componentConfig.tag}>`,
     contentMode: 'json',
   };
