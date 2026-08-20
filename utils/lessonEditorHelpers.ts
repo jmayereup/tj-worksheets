@@ -54,11 +54,12 @@ export const buildLessonObject = (
   idOverride?: string,
   existingData?: any
 ): LessonObjectData => {
+  const metadata = formState.metadata || {};
   const isTest = ['tj-test', 'test', 'quiz-element'].includes(formState.lessonType);
-  const effectiveStartCode = formState.startCode || (isTest ? '6767' : '');
-  const effectiveTeacherCode = formState.teacherCode || (isTest ? '7676' : '6767');
-  const effectivePassThreshold = formState.passThreshold || (isTest ? '75%' : '');
-  const effectiveTestMode = Boolean(formState.testMode);
+  const effectiveStartCode = metadata.startCode || formState.startCode || (isTest ? '6767' : '');
+  const effectiveTeacherCode = metadata.teacherCode || formState.teacherCode || (isTest ? '7676' : '6767');
+  const effectivePassThreshold = metadata.passThreshold || formState.passThreshold || (isTest ? '75%' : '');
+  const effectiveTestMode = Boolean(metadata.testMode ?? formState.testMode);
 
   let updatedContent = content;
   if (content && typeof content === 'object' && !Array.isArray(content)) {
@@ -82,7 +83,7 @@ export const buildLessonObject = (
   }
 
   const customConfig = {
-    ...formState.customConfig,
+    ...(metadata.customConfig || formState.customConfig || {}),
     testMode: effectiveTestMode,
     ...(effectiveStartCode ? { startCode: effectiveStartCode } : {}),
     ...(effectivePassThreshold ? { passThreshold: effectivePassThreshold } : {})
@@ -90,16 +91,16 @@ export const buildLessonObject = (
 
   return {
     id: idOverride || undefined,
-    title: formState.title,
-    language: formState.language,
-    level: formState.level,
-    tags: formState.selectedTags,
-    videoUrl: formState.videoUrl,
-    isVideoLesson: formState.isVideoLesson,
-    notForBlog: formState.notForBlog,
-    lessonType: formState.lessonType,
-    seo: formState.seo,
-    html: formState.html,
+    title: formState.title || '',
+    language: formState.language || '',
+    level: formState.level || '',
+    tags: formState.selectedTags || formState.tags || [],
+    videoUrl: formState.videoUrl || '',
+    isVideoLesson: Boolean(formState.isVideoLesson),
+    notForBlog: Boolean(formState.notForBlog),
+    lessonType: formState.lessonType || 'worksheet',
+    seo: metadata.seo ?? formState.seo ?? '',
+    html: metadata.html ?? formState.html ?? '',
     teacherCode: effectiveTeacherCode,
     startCode: effectiveStartCode,
     passThreshold: effectivePassThreshold,
@@ -120,20 +121,20 @@ export const generateFormData = (
 ): FormData => {
   const formData = new FormData();
   
-  formData.append('title', lesson.title);
-  formData.append('language', lesson.language);
-  formData.append('level', lesson.level);
-  lesson.tags.forEach(tag => formData.append('tags', tag));
-  formData.append('videoUrl', lesson.videoUrl);
-  formData.append('isVideoLesson', String(lesson.isVideoLesson));
-  formData.append('notForBlog', String(!!lesson.notForBlog));
-  formData.append('lessonType', lesson.lessonType);
-  formData.append('seo', lesson.seo);
-  formData.append('html', lesson.html);
-  formData.append('teacherCode', lesson.teacherCode);
-  formData.append('customConfig', JSON.stringify(lesson.customConfig));
-  formData.append('content', JSON.stringify(lesson.content));
-  formData.append('htmlCompiled', htmlCompiled);
+  formData.append('title', lesson.title || '');
+  if (lesson.language) formData.append('language', lesson.language);
+  if (lesson.level) formData.append('level', lesson.level);
+  (lesson.tags || []).forEach(tag => formData.append('tags', tag));
+  if (lesson.videoUrl) formData.append('videoUrl', lesson.videoUrl);
+  formData.append('isVideoLesson', String(Boolean(lesson.isVideoLesson)));
+  formData.append('notForBlog', String(Boolean(lesson.notForBlog)));
+  if (lesson.lessonType) formData.append('lessonType', lesson.lessonType);
+  if (lesson.seo) formData.append('seo', lesson.seo);
+  if (lesson.html) formData.append('html', lesson.html);
+  if (lesson.teacherCode) formData.append('teacherCode', lesson.teacherCode);
+  if (lesson.customConfig) formData.append('customConfig', JSON.stringify(lesson.customConfig));
+  if (lesson.content) formData.append('content', JSON.stringify(lesson.content));
+  if (htmlCompiled) formData.append('htmlCompiled', htmlCompiled);
 
   if (imageFile) {
     formData.append('image', imageFile);

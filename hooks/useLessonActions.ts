@@ -83,7 +83,7 @@ export const useLessonActions = ({
         existingData
       );
 
-      const htmlCompiled = generateEmbedCode(lessonForCompile, formState.html);
+      const htmlCompiled = generateEmbedCode(lessonForCompile, lessonForCompile.html);
       if (!htmlCompiled) {
         onError(VALIDATION_MESSAGES.FAILED_TO_GENERATE_EMBED);
         return;
@@ -155,7 +155,7 @@ export const useLessonActions = ({
         existingData
       );
 
-      const embedCode = generateEmbedCode(lessonForEmbed, formState.html);
+      const embedCode = generateEmbedCode(lessonForEmbed, lessonForEmbed.html);
       if (embedCode) {
         navigator.clipboard.writeText(embedCode);
         alert("Embed code copied to clipboard!");
@@ -182,7 +182,7 @@ export const useLessonActions = ({
         existingData
       );
 
-      const embedCode = generateEmbedCode(lessonForHTML, formState.html);
+      const embedCode = generateEmbedCode(lessonForHTML, lessonForHTML.html);
       if (!embedCode) {
         onError(VALIDATION_MESSAGES.FAILED_TO_GENERATE_EMBED);
         return;

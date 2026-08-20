@@ -383,8 +383,17 @@ export const createLesson = async (data: any) => {
     }
   } catch (err: any) {
     const detail = err?.response?.data || err?.data;
-    console.error('createLesson failed:', { status: err?.status, message: err?.message, data: detail });
-    const e: any = new Error(detail?.message || err?.message || 'Failed to create worksheet.');
+    const fieldErrors = detail?.data;
+    let fieldErrorsMsg = '';
+    if (fieldErrors && typeof fieldErrors === 'object') {
+      fieldErrorsMsg = Object.entries(fieldErrors)
+        .map(([k, v]: [string, any]) => `${k}: ${v?.message || JSON.stringify(v)}`)
+        .join(', ');
+    }
+    const baseMsg = detail?.message || err?.message || 'Failed to create worksheet.';
+    const fullMsg = fieldErrorsMsg ? `${baseMsg} (${fieldErrorsMsg})` : baseMsg;
+    console.error('createLesson failed: status=' + err?.status + ' message=' + fullMsg + ' fieldErrors=' + JSON.stringify(fieldErrors || null));
+    const e: any = new Error(fullMsg);
     e.status = err?.status;
     e.code = 'CREATE_FAILED';
     e.fieldErrors = detail?.data || null;
