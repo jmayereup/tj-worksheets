@@ -277,6 +277,7 @@ export type WorksheetsRecord<Tcontent = unknown, TcustomConfig = any> = {
 	tags: WorksheetsTagsOptions[]
 	title?: string
 	teacherCode?: string
+	submissionUrl?: string
 	updated: IsoAutoDateString
 	videoUrl?: string
 }
