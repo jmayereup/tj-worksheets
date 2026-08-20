@@ -7,6 +7,7 @@ import { useTeacherSubmission } from '../../hooks/useTeacherSubmission';
 interface Props {
   data: ReportData;
   onClose: () => void;
+  onReset?: () => void;
   teacherCode?: string;
 }
 
@@ -19,7 +20,7 @@ const ScorePill = ({ label, score, total }: { label: string, score: number, tota
   </div>
 );
 
-export const ReportCard: React.FC<Props> = ({ data, onClose, teacherCode = '6767' }) => {
+export const ReportCard: React.FC<Props> = ({ data, onClose, onReset, teacherCode = '6767' }) => {
   const {
     isSubmitting,
     submissionStatus,
@@ -171,6 +172,15 @@ export const ReportCard: React.FC<Props> = ({ data, onClose, teacherCode = '6767
             <Button variant="secondary" onClick={onClose} className="w-full font-bold">
               Return to Lesson
             </Button>
+            {onReset && (
+              <button
+                type="button"
+                onClick={onReset}
+                className="w-full py-2.5 px-4 text-xs font-bold text-red-600 hover:text-red-700 bg-red-50/60 hover:bg-red-100/80 border border-red-200 rounded-xl transition-all flex items-center justify-center gap-1.5"
+              >
+                🔄 Clear Cache & Start Again
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -465,6 +465,7 @@ export const LessonView: React.FC<Props> = ({ lesson, teacherCode, submissionUrl
             setShowReportCard(false);
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }} 
+          onReset={handleReset}
         />
       )}
 
