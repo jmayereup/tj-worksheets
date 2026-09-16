@@ -28,7 +28,7 @@ export const SubmissionSection: React.FC<SubmissionSectionProps> = ({
   const labelClasses = "text-white";
 
   return (
-    <section className={containerClasses}>
+    <section id="submission-section" className={`tj-submission-section ${containerClasses}`}>
       <h2 className="text-2xl font-bold mb-4">
         {isNameLocked ? 'Update Score' : 'Finished?'}
       </h2>

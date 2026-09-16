@@ -13,6 +13,7 @@ interface LessonFooterProps {
   isNameLocked: boolean;
   onFinish: () => void;
   onReset: () => void;
+  footerRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 export const LessonFooter: React.FC<LessonFooterProps> = ({
@@ -25,9 +26,10 @@ export const LessonFooter: React.FC<LessonFooterProps> = ({
   isNameLocked,
   onFinish,
   onReset,
+  footerRef,
 }) => {
   return (
-    <div className="flex flex-col items-center gap-4 py-2 animate-fade-in print:hidden">
+    <div ref={footerRef} className="tj-lesson-footer flex flex-col items-center gap-4 py-2 animate-fade-in print:hidden">
       <SubmissionSection 
         studentName={studentName}
         setStudentName={setStudentName}

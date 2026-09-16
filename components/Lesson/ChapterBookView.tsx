@@ -84,6 +84,7 @@ export const ChapterBookView: React.FC<ChapterBookViewProps> = ({
   const [activePracticeGame, setActivePracticeGame] = useState<'scramble' | 'fill' | 'wordblaster' | null>(null);
   
   const readingPassageRef = useRef<HTMLDivElement>(null);
+  const footerRef = useRef<HTMLDivElement>(null);
 
   const handleChapterChange = (newIndex: number) => {
     setCurrentChapterIndex(newIndex);
@@ -263,9 +264,18 @@ export const ChapterBookView: React.FC<ChapterBookViewProps> = ({
                   if (currentChapterIndex < content.chapters.length - 1) {
                     handleChapterChange(currentChapterIndex + 1);
                   } else {
-                    const el = document.querySelector('.tj-lesson-footer') || document.querySelector('footer');
-                    if (el) {
-                      el.scrollIntoView({ behavior: 'smooth' });
+                    const targetEl = footerRef.current ||
+                      (readingPassageRef.current?.getRootNode() as ShadowRoot | Document)?.querySelector?.('#submission-section, .tj-submission-section, .tj-lesson-footer') ||
+                      document.querySelector('#submission-section, .tj-submission-section, .tj-lesson-footer') ||
+                      document.querySelector('footer');
+                    if (targetEl) {
+                      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      setTimeout(() => {
+                        const input = targetEl.querySelector('input:not([disabled])') as HTMLInputElement | null;
+                        if (input) {
+                          input.focus({ preventScroll: true });
+                        }
+                      }, 400);
                     }
                   }
                 }}
@@ -299,6 +309,7 @@ export const ChapterBookView: React.FC<ChapterBookViewProps> = ({
         </section>
 
         <LessonFooter
+          footerRef={footerRef}
           studentName={studentName}
           setStudentName={setStudentName}
           studentId={studentId}

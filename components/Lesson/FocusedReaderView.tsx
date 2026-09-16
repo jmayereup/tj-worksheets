@@ -89,6 +89,7 @@ export const FocusedReaderView: React.FC<FocusedReaderViewProps> = ({
 
   const currentPart = content.parts[currentPartIndex];
   const readingPassageRef = useRef<HTMLDivElement>(null);
+  const footerRef = useRef<HTMLDivElement>(null);
 
   const optimizedImageUrl = React.useMemo(() => {
     if (!lesson.imageUrl) return undefined;
@@ -263,9 +264,18 @@ export const FocusedReaderView: React.FC<FocusedReaderViewProps> = ({
                   if (currentPartIndex < content.parts.length - 1) {
                     handlePageChange(currentPartIndex + 1);
                   } else {
-                    const el = document.querySelector('.tj-lesson-footer') || document.querySelector('footer');
-                    if (el) {
-                      el.scrollIntoView({ behavior: 'smooth' });
+                    const targetEl = footerRef.current ||
+                      (readingPassageRef.current?.getRootNode() as ShadowRoot | Document)?.querySelector?.('#submission-section, .tj-submission-section, .tj-lesson-footer') ||
+                      document.querySelector('#submission-section, .tj-submission-section, .tj-lesson-footer') ||
+                      document.querySelector('footer');
+                    if (targetEl) {
+                      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      setTimeout(() => {
+                        const input = targetEl.querySelector('input:not([disabled])') as HTMLInputElement | null;
+                        if (input) {
+                          input.focus({ preventScroll: true });
+                        }
+                      }, 400);
                     }
                   }
                 }}
@@ -320,6 +330,7 @@ export const FocusedReaderView: React.FC<FocusedReaderViewProps> = ({
       </div>
 
         <LessonFooter
+          footerRef={footerRef}
           studentName={studentName}
           setStudentName={setStudentName}
           studentId={studentId}

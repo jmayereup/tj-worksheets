@@ -360,7 +360,17 @@ export const ReadingPassage: React.FC<ReadingPassageProps> = ({
                 Next <ChevronRight className="w-5 h-5" />
               </Button>
             ) : (
-              <div className="text-green-600 font-black flex items-center gap-2 animate-bounce">
+              <div
+                onClick={() => {
+                  const root = passageRef?.current?.getRootNode() as ShadowRoot | Document;
+                  const el = root?.querySelector?.('#submission-section, .tj-submission-section, .tj-lesson-footer') ||
+                             document.querySelector('#submission-section, .tj-submission-section, .tj-lesson-footer') ||
+                             document.querySelector('footer');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }}
+                className="text-green-600 font-black flex items-center gap-2 animate-bounce cursor-pointer hover:opacity-80 transition-opacity"
+                title="Scroll to finished section"
+              >
                 <CheckCircle2 className="w-6 h-6" /> All Pages Read!
               </div>
             )}
