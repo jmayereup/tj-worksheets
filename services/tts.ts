@@ -109,19 +109,43 @@ export const FALLBACK_MODELS: Record<string, TTSModelMetadata> = {
       { code: 'zh-CN', name: 'Chinese (Simplified)' },
     ],
   },
-  'google/gemini-3.1-flash-tts-preview': {
-    id: 'google/gemini-3.1-flash-tts-preview',
-    name: 'Google: Gemini 3.1 Flash TTS Preview',
+  'google/gemini-3.8-flash-lite-tts': {
+    id: 'google/gemini-3.8-flash-lite-tts',
+    name: 'Google: Gemini 3.8 Flash Lite TTS',
     description:
-      'High-performance TTS model supporting 70+ languages and inline audio tags (e.g. [whispers], [laughs]).',
-    pricing: { prompt: '0.000001', completion: '0.00002', unit: 'token' },
+      'Fast, high-throughput speech model supporting 70+ languages, inline audio tags (e.g. [whispers], [laughs]), and 30 voices.',
+    pricing: { prompt: '0.0000005', completion: '0.000006', unit: 'token' },
     voices: [
       { id: 'Puck', name: 'Upbeat Male: Puck' },
       { id: 'Zephyr', name: 'Bright Female: Zephyr' },
-      { id: 'Charon', name: 'Charon' },
-      { id: 'Kore', name: 'Kore' },
-      { id: 'Fenrir', name: 'Fenrir' },
-      { id: 'Aoede', name: 'Aoede' },
+      { id: 'Charon', name: 'Deep Male: Charon' },
+      { id: 'Kore', name: 'Warm Female: Kore' },
+      { id: 'Fenrir', name: 'Resonant Male: Fenrir' },
+      { id: 'Aoede', name: 'Expressive Female: Aoede' },
+      { id: 'Leda', name: 'Leda' },
+      { id: 'Orus', name: 'Orus' },
+      { id: 'Callirrhoe', name: 'Callirrhoe' },
+      { id: 'Autonoe', name: 'Autonoe' },
+      { id: 'Enceladus', name: 'Enceladus' },
+      { id: 'Iapetus', name: 'Iapetus' },
+      { id: 'Umbriel', name: 'Umbriel' },
+      { id: 'Algieba', name: 'Algieba' },
+      { id: 'Despina', name: 'Despina' },
+      { id: 'Erinome', name: 'Erinome' },
+      { id: 'Algenib', name: 'Algenib' },
+      { id: 'Rasalgethi', name: 'Rasalgethi' },
+      { id: 'Laomedeia', name: 'Laomedeia' },
+      { id: 'Achernar', name: 'Achernar' },
+      { id: 'Alnilam', name: 'Alnilam' },
+      { id: 'Schedar', name: 'Schedar' },
+      { id: 'Gacrux', name: 'Gacrux' },
+      { id: 'Pulcherrima', name: 'Pulcherrima' },
+      { id: 'Achird', name: 'Achird' },
+      { id: 'Zubenelgenubi', name: 'Zubenelgenubi' },
+      { id: 'Vindemiatrix', name: 'Vindemiatrix' },
+      { id: 'Sadachbia', name: 'Sadachbia' },
+      { id: 'Sadaltager', name: 'Sadaltager' },
+      { id: 'Sulafat', name: 'Sulafat' },
     ],
     response_format: 'pcm',
     supportsLanguage: true,
@@ -192,8 +216,27 @@ export const fetchTTSModels = async (): Promise<{
     }
 
     const data = await res.json();
+    const rawModels: Record<string, TTSModelMetadata> = data.models || FALLBACK_MODELS;
+    const sanitizedModels: Record<string, TTSModelMetadata> = {};
+
+    for (const [key, model] of Object.entries(rawModels)) {
+      if (key === 'google/gemini-3.1-flash-tts-preview') {
+        sanitizedModels['google/gemini-3.8-flash-lite-tts'] = {
+          ...FALLBACK_MODELS['google/gemini-3.8-flash-lite-tts'],
+          ...(model.voices && model.voices.length > 0 ? { voices: model.voices } : {}),
+        };
+      } else {
+        sanitizedModels[key] = model;
+      }
+    }
+
+    // Ensure gemini-3.8-flash-lite-tts is always present if not already added
+    if (!sanitizedModels['google/gemini-3.8-flash-lite-tts'] && FALLBACK_MODELS['google/gemini-3.8-flash-lite-tts']) {
+      sanitizedModels['google/gemini-3.8-flash-lite-tts'] = FALLBACK_MODELS['google/gemini-3.8-flash-lite-tts'];
+    }
+
     return {
-      models: data.models || FALLBACK_MODELS,
+      models: sanitizedModels,
       r2Configured: !!data.r2Configured,
     };
   } catch (err: any) {

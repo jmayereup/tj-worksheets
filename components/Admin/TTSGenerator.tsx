@@ -86,10 +86,15 @@ export const TTSGenerator: React.FC<TTSGeneratorProps> = ({ onBack, onAudioGener
           setModels(fetchedModels);
           setR2Configured(r2Avail);
           setPushToR2(r2Avail);
-          if (!fetchedModels[selectedModelId]) {
-            const firstKey = Object.keys(fetchedModels)[0];
-            if (firstKey) setSelectedModelId(firstKey);
-          }
+          setSelectedModelId((prev) => {
+            if (prev === 'google/gemini-3.1-flash-tts-preview' && fetchedModels['google/gemini-3.8-flash-lite-tts']) {
+              return 'google/gemini-3.8-flash-lite-tts';
+            }
+            if (!fetchedModels[prev]) {
+              return Object.keys(fetchedModels)[0] || prev;
+            }
+            return prev;
+          });
         }
       } catch (e) {
         console.warn('Could not fetch models:', e);
@@ -163,6 +168,18 @@ export const TTSGenerator: React.FC<TTSGeneratorProps> = ({ onBack, onAudioGener
             const raw = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
             const tone = parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
             name = `${lang}: ${raw} (${tone})`;
+          }
+        } else if (selectedModelId.startsWith('google/gemini-') && typeof id === 'string') {
+          const knownLabels: Record<string, string> = {
+            Puck: 'Upbeat Male: Puck',
+            Zephyr: 'Bright Female: Zephyr',
+            Charon: 'Deep Male: Charon',
+            Kore: 'Warm Female: Kore',
+            Fenrir: 'Resonant Male: Fenrir',
+            Aoede: 'Expressive Female: Aoede',
+          };
+          if (knownLabels[id] && (name === id || !name)) {
+            name = knownLabels[id];
           }
         }
 
@@ -411,7 +428,7 @@ export const TTSGenerator: React.FC<TTSGeneratorProps> = ({ onBack, onAudioGener
                 className="w-full rounded-xl border border-gray-200 p-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                 required
               />
-              {selectedModelId === 'google/gemini-3.1-flash-tts-preview' && (
+              {selectedModelId.startsWith('google/gemini-') && (
                 <p className="flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 p-2 rounded-lg">
                   <Info className="w-3.5 h-3.5 flex-shrink-0" />
                   <span>Tip: You can use inline speech tags like <code>[whispers]</code>, <code>[laughs]</code>, or <code>[excited]</code> in your text.</span>
@@ -442,8 +459,16 @@ export const TTSGenerator: React.FC<TTSGeneratorProps> = ({ onBack, onAudioGener
                       }`}
                     >
                       <div>
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="font-bold text-xs text-gray-900 line-clamp-1">{m.name.split(':')[1] || m.name}</span>
+                        <div className="flex items-center justify-between gap-1 mb-1">
+                          <span
+                            className="font-bold text-xs text-gray-900 truncate"
+                            title={m.name}
+                          >
+                            {(m.name.includes(':') ? m.name.split(':')[1] : m.name)
+                              .replace(/\s*TTS\s*Preview/i, '')
+                              .replace(/\s*TTS$/i, '')
+                              .trim()}
+                          </span>
                           {isSelected && <CheckCircle2 className="w-4 h-4 text-purple-600 flex-shrink-0" />}
                         </div>
                         <p className="text-[11px] text-gray-500 line-clamp-2 leading-relaxed mb-2">
