@@ -217,14 +217,13 @@ The React app does NOT consume `htmlCompiled` at runtime — it always re-derive
 | --- | --- | --- |
 | `lbl-reader` | `lbl-reader` | `tj-reader.js` |
 | `grammar-hearts` | `tj-grammar-hearts` | `tj-grammar-hearts.js` |
-| `information-gap` | `tj-info-gap` | `tj-info-gap.js` |
 | `listening` | `tj-listening` | `tj-listening.js` |
 | `speed-review` | `tj-speed-review` | `tj-speed-review.js` |
 | `chapter-book` | `tj-chapter-book` | `tj-chapter-book.js` |
 | `pronunciation` | `tj-pronunciation` | `tj-pronunciation.js` |
 | `tj-test` | `tj-test` | `tj-test.js` |
 | `quiz-element` (legacy) | `tj-quiz-element` | `tj-quiz-element.js` |
-| `worksheet` / `focused-reading` / `word-blaster` | *(none — React-only or `tj-pocketbase-worksheet`)* | falls back to inline React `WorksheetView` or the bundled `<tj-pocketbase-worksheet>` element |
+| `worksheet` / `focused-reading` / `word-blaster` / `information-gap` | *(none — React-only or `tj-pocketbase-worksheet`)* | falls back to inline React `InformationGapView`/`WorksheetView` or the bundled `<tj-pocketbase-worksheet>` element |
 
 The React app injects the CDN script dynamically (no bundling):
 

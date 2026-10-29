@@ -9,8 +9,7 @@ export const getComponentConfig = (lessonType: string): ComponentConfig | null =
       return { tag: 'lbl-reader', script: 'https://scripts.teacherjake.com/tj-reader.js' };
     case 'grammar-hearts':
       return { tag: 'tj-grammar-hearts', script: 'https://scripts.teacherjake.com/tj-grammar-hearts.js' };
-    case 'information-gap':
-      return { tag: 'tj-info-gap', script: 'https://scripts.teacherjake.com/tj-info-gap.js' };
+
     case 'listening':
       return { tag: 'tj-listening', script: 'https://scripts.teacherjake.com/tj-listening.js' };
     case 'speed-review':
