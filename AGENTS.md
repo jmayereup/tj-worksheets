@@ -500,4 +500,5 @@ The refactored `LessonEditorRefactored` maintains 100% functional parity with th
 - Read the existing `parseContent` and `compileLessonHtml` — they are the canonical references for the content pipeline
 - Check the `DESIGN.md` and `SUBMISSION_GUIDE.md` for design tokens and submission flow specifics
 - Load `.agents/skills/pocketbase-best-practices/SKILL.md` for any PocketBase work
+- **Header & Top Image Deduplication**: Components mounted via `<tj-pocketbase-worksheet>` are rendered under `LessonView.tsx`, which provides the unified `displayTitle` and `seoDescription`. Sub-views (such as `InformationGapView`, `WorksheetView`, and `FocusedReaderView`) should not render duplicate `<h1>` headers or subtitles. In `tj-astro`, lesson types whose components render their own media (including `information-gap`, `worksheet`, and `focused-reading`) must be included in `hideTopImage` to prevent Astro from pre-rendering a duplicate top banner image.
 - The user makes deploy calls. You write code.

@@ -159,8 +159,8 @@ export const InformationGapView: React.FC<InformationGapViewProps> = ({
     const mainDesc = (Array.isArray(content) ? firstActivity.scenario_description : content.scenario_description) || "Select your role to begin.";
     
     return (
-      <div className="max-w-4xl mx-auto py-12 px-4 animate-fade-in">
-        <div className="hidden sm:flex mb-8">
+      <div className="max-w-4xl mx-auto py-4 px-1 sm:px-4 animate-fade-in">
+        <div className="hidden sm:flex mb-6 print:hidden">
           <InformationGapExportActions
             lesson={{ ...lesson, optimizedImageUrl }}
             displayTitle={mainTitle}
@@ -170,13 +170,13 @@ export const InformationGapView: React.FC<InformationGapViewProps> = ({
           />
         </div>
 
-        <div className="text-center mb-12 print:hidden">
+        <div className="text-center mb-8 print:hidden">
           <LessonMedia 
             imageUrl={lesson.imageUrl} 
             title={mainTitle} 
           />
           
-          <div className="flex justify-center gap-2 mb-6">
+          <div className="flex justify-center gap-2 mb-4">
             <span className="bg-green-100 text-green-800 px-4 py-1.5 rounded-full text-sm font-black uppercase tracking-wider border border-green-200">
                 {lesson.language}
             </span>
@@ -189,9 +189,6 @@ export const InformationGapView: React.FC<InformationGapViewProps> = ({
                 Speaking
             </span>
           </div>
-
-          <h1 className="text-3xl font-black text-green-900 mb-4 tracking-tight leading-tight max-w-2xl mx-auto">{mainTitle}</h1>
-          <p className="text-lg text-gray-600 font-medium max-w-xl mx-auto">{mainDesc}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-2xl mx-auto mb-12 print:hidden">
