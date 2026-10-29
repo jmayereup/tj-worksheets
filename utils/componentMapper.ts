@@ -27,3 +27,15 @@ export const getComponentConfig = (lessonType: string): ComponentConfig | null =
       return null;
   }
 };
+
+export const isExternalWebComponent = (lessonType?: string): boolean => {
+  if (!lessonType) return false;
+  return getComponentConfig(lessonType) !== null;
+};
+
+export type LessonComponentSource = 'wc' | 'internal';
+
+export const getLessonComponentSource = (lessonType?: string): LessonComponentSource | null => {
+  if (!lessonType) return null;
+  return isExternalWebComponent(lessonType) ? 'wc' : 'internal';
+};

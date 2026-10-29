@@ -5,6 +5,7 @@ import { Button } from '../UI/Button';
 import { Edit, Trash2, ExternalLink, RefreshCw, Layers, Globe, Calendar, Eye, EyeOff, Search, FileText, CheckSquare, Square, Rocket, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { extractVocabularyFromLessons } from '../../utils/vocabularyExtractor';
 import { LANGUAGE_OPTIONS, LESSON_TYPE_OPTIONS, formatLessonType } from '../../types';
+import { isExternalWebComponent } from '../../utils/componentMapper';
 
 interface LessonListProps {
     onEdit: (id: string) => void;
@@ -203,7 +204,7 @@ export const LessonList: React.FC<LessonListProps> = ({ onEdit, onPreview, onAdd
                             <FileText className="h-3.5 w-3.5 text-gray-400 group-focus-within/select:text-green-500 transition-colors" />
                         </div>
                         <select
-                            className="block w-full md:w-44 pl-9 pr-8 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all shadow-sm appearance-none cursor-pointer"
+                            className="block w-full md:w-44 pl-9 pr-14 py-2.5 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all shadow-sm appearance-none cursor-pointer"
                             value={selectedType}
                             onChange={(e) => setSelectedType(e.target.value)}
                         >
@@ -212,7 +213,10 @@ export const LessonList: React.FC<LessonListProps> = ({ onEdit, onPreview, onAdd
                                 <option key={type} value={type}>{formatLessonType(type)}</option>
                             ))}
                         </select>
-                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-gray-400">
+                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center gap-1 pointer-events-none text-gray-400">
+                            {selectedType !== 'All' && isExternalWebComponent(selectedType) && (
+                                <span className="text-xs font-medium text-gray-400 select-none">WC</span>
+                            )}
                             <ChevronDown className="h-3.5 w-3.5" />
                         </div>
                     </div>

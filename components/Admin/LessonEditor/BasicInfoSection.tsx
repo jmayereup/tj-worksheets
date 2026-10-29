@@ -1,7 +1,9 @@
 import React from 'react';
-import { Globe, Layers, Layout, Tag as TagIcon, Check } from 'lucide-react';
+import { Globe, Layers, Tag as TagIcon, Check } from 'lucide-react';
 import { SearchableSelect } from '../../UI/SearchableSelect';
-import { LANGUAGE_OPTIONS, LEVEL_OPTIONS, TAG_OPTIONS, LESSON_TYPE_OPTIONS, formatLessonType } from '../../../types';
+import { CustomSelect } from '../../UI/CustomSelect';
+import { LessonTypeSelect } from './LessonTypeSelect';
+import { LANGUAGE_OPTIONS, LEVEL_OPTIONS, TAG_OPTIONS } from '../../../types';
 
 interface BasicInfoSectionProps {
   title: string;
@@ -72,44 +74,26 @@ export const BasicInfoSection: React.FC<BasicInfoSectionProps> = ({
           
           <div>
             <label className="block text-sm font-black text-gray-700 mb-2 ml-1 uppercase tracking-wider">Level</label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                <Layers className="h-4 w-4 text-gray-400" />
-              </div>
-              <select
-                value={level}
-                onChange={(e) => onLevelChange(e.target.value)}
-                required={!isPublicCreator}
-                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none appearance-none"
-              >
-                <option value="" disabled>Select level...</option>
-                {LEVEL_OPTIONS.map(opt => (
-                  <option key={opt} value={opt}>{opt}</option>
-                ))}
-              </select>
-            </div>
+            <CustomSelect
+              value={level}
+              onChange={onLevelChange}
+              options={LEVEL_OPTIONS}
+              placeholder="Select level..."
+              required={!isPublicCreator}
+              icon={<Layers className="h-4 w-4 text-gray-400" />}
+              className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none hover:border-gray-300 transition-colors"
+            />
           </div>
         </div>
       )}
 
       <div>
         <label className="block text-sm font-black text-gray-700 mb-2 ml-1 uppercase tracking-wider">Lesson Type</label>
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-            <Layout className="h-4 w-4 text-gray-400" />
-          </div>
-          <select
-            value={lessonType}
-            onChange={(e) => onLessonTypeChange(e.target.value)}
-            required
-            className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-green-500 outline-none appearance-none"
-          >
-            <option value="" disabled>Select lesson type...</option>
-            {LESSON_TYPE_OPTIONS.map(opt => (
-              <option key={opt} value={opt}>{formatLessonType(opt)}</option>
-            ))}
-          </select>
-        </div>
+        <LessonTypeSelect
+          value={lessonType}
+          onChange={onLessonTypeChange}
+          required
+        />
       </div>
 
       {!isPublicCreator && (
