@@ -12,7 +12,7 @@ import { LessonMedia } from '../UI/LessonMedia';
 import { ReferenceLinks } from '../UI/ReferenceLinks';
 import { VideoExploration } from '../UI/VideoExploration';
 import { CriticalThinkingExtension } from '../Activities/CriticalThinkingExtension';
-import { useFocusedReaderScores } from '../../hooks/useFocusedReaderScores';
+import { useFocusedReaderScores, getFocusedReaderCriticalThinking } from '../../hooks/useFocusedReaderScores';
 import { FocusedReaderExportActions } from '../UI/FocusedReaderExportActions';
 import { seededShuffle } from '../../utils/textUtils';
 import { PracticeGamesModal } from './PracticeGamesModal';
@@ -125,8 +125,11 @@ export const FocusedReaderView: React.FC<FocusedReaderViewProps> = ({
     comprehensionScore,
     comprehensionTotal,
     isComprehensionCompleted,
+    isCriticalThinkingCompleted,
     calculateReportData
   } = useFocusedReaderScores(content, answers, currentPartIndex, lesson.id);
+
+  const criticalThinking = getFocusedReaderCriticalThinking(content, currentPartIndex);
 
 
   return (
@@ -289,8 +292,48 @@ export const FocusedReaderView: React.FC<FocusedReaderViewProps> = ({
           <ReferenceLinks references={content.references} />
         )}
 
-        {/* Practice Games Section */}
-        <section className="mt-8 animate-fade-in print:hidden">
+        {/* Critical Thinking Section */}
+        {criticalThinking && (
+          <section className="mt-8 animate-fade-in">
+            <CollapsibleActivity
+              isCompleted={isCriticalThinkingCompleted}
+              title={criticalThinking.title || "Critical Thinking & Discussion"}
+            >
+              <CriticalThinkingExtension 
+                data={criticalThinking}
+                savedAnswers={answers.writing || {}}
+                onChange={(newWriting) => {
+                  setAnswers(prev => ({
+                    ...prev,
+                    writing: newWriting
+                  }));
+                }}
+              />
+            </CollapsibleActivity>
+          </section>
+        )}
+
+        <div className="mt-8">
+          <VideoExploration videoUrl={lesson.videoUrl} isVideoLesson={lesson.isVideoLesson} />
+        </div>
+      </div>
+
+      <LessonFooter
+        footerRef={footerRef}
+        studentName={studentName}
+        setStudentName={setStudentName}
+        studentId={studentId}
+        setStudentId={setStudentId}
+        homeroom={homeroom}
+        setHomeroom={setHomeroom}
+        isNameLocked={isNameLocked}
+        onFinish={() => onFinish(calculateReportData(lesson.title, studentName, studentId, homeroom))}
+        onReset={onReset}
+      />
+
+      {/* Practice Games Section (Optional practice games placed below Finished / Reset) */}
+      <div className="max-w-4xl mx-auto px-1 sm:px-4 pb-4 print:hidden">
+        <section className="animate-fade-in">
           <CollapsibleActivity
             isCompleted={false}
             title="Extra Practice Games"
@@ -311,36 +354,7 @@ export const FocusedReaderView: React.FC<FocusedReaderViewProps> = ({
             </div>
           </CollapsibleActivity>
         </section>
-
-        {/* Critical Thinking Section (Independent of parts) */}
-        {content.criticalThinking && (
-          <section className="mt-8 animate-fade-in">
-            <CollapsibleActivity
-              isCompleted={false}
-              title={content.criticalThinking.title || "Critical Thinking & Discussion"}
-            >
-              <CriticalThinkingExtension data={content.criticalThinking} />
-            </CollapsibleActivity>
-          </section>
-        )}
-
-        <div className="mt-8">
-          <VideoExploration videoUrl={lesson.videoUrl} isVideoLesson={lesson.isVideoLesson} />
-        </div>
       </div>
-
-        <LessonFooter
-          footerRef={footerRef}
-          studentName={studentName}
-          setStudentName={setStudentName}
-          studentId={studentId}
-          setStudentId={setStudentId}
-          homeroom={homeroom}
-          setHomeroom={setHomeroom}
-          isNameLocked={isNameLocked}
-          onFinish={() => onFinish(calculateReportData(lesson.title, studentName, studentId, homeroom))}
-          onReset={onReset}
-        />
 
       {/* Print-only Layout */}
       <div className="hidden print:block" style={{ fontSize: '12px', padding: '16px 24px' }}>
@@ -460,6 +474,29 @@ export const FocusedReaderView: React.FC<FocusedReaderViewProps> = ({
               </div>
             );
           })}
+
+          {(() => {
+            const ct = getFocusedReaderCriticalThinking(content);
+            if (!ct || !ct.instructions || ct.instructions.length === 0) return null;
+            return (
+              <section className="space-y-3 mb-6">
+                <h2 className="text-sm font-bold mb-1 bg-gray-100 px-2 py-1">
+                  {ct.title || "Critical Thinking & Discussion"}
+                </h2>
+                <div className="space-y-3">
+                  {ct.instructions.map((instruction, i) => (
+                    <div key={i}>
+                      <p className="text-xs font-bold mb-1">{i + 1}. {instruction}</p>
+                      <div className="space-y-2">
+                        <div className="border-b border-gray-300 h-5"></div>
+                        <div className="border-b border-gray-300 h-5"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            );
+          })()}
         </div>
       </div>
 

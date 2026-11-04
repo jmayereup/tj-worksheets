@@ -106,6 +106,7 @@ export interface FocusedReaderPart {
   text: string;
   vocabulary_explanations: Record<string, string>;
   questions: FocusedReaderQuestion[];
+  criticalThinking?: CriticalThinkingActivity;
 }
 
 export interface FocusedReaderContent {

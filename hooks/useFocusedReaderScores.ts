@@ -3,9 +3,49 @@ import {
   FocusedReaderContent, 
   UserAnswers, 
   ReportData, 
-  ReportScorePill 
+  ReportScorePill,
+  ReportWrittenResponse,
+  CriticalThinkingActivity
 } from '../types';
 import { seededShuffle } from '../utils/textUtils';
+
+export const getFocusedReaderCriticalThinking = (
+  content: FocusedReaderContent,
+  currentPartIndex?: number
+): CriticalThinkingActivity | undefined => {
+  if (currentPartIndex !== undefined && content.parts?.[currentPartIndex]?.criticalThinking) {
+    return content.parts[currentPartIndex].criticalThinking;
+  }
+  if (content.criticalThinking) {
+    return content.criticalThinking;
+  }
+  if ((content.activities as any)?.criticalThinking) {
+    return (content.activities as any).criticalThinking;
+  }
+  const partWithCT = content.parts?.find(p => p.criticalThinking);
+  if (partWithCT?.criticalThinking) {
+    return partWithCT.criticalThinking;
+  }
+  return undefined;
+};
+
+export const getAllFocusedReaderCriticalThinkingQuestions = (
+  content: FocusedReaderContent
+): string[] => {
+  if (content.criticalThinking?.instructions?.length) {
+    return content.criticalThinking.instructions;
+  }
+  if ((content.activities as any)?.criticalThinking?.instructions?.length) {
+    return (content.activities as any).criticalThinking.instructions;
+  }
+  const questions: string[] = [];
+  content.parts?.forEach(p => {
+    if (p.criticalThinking?.instructions?.length) {
+      questions.push(...p.criticalThinking.instructions);
+    }
+  });
+  return questions;
+};
 
 export const useFocusedReaderScores = (
   content: FocusedReaderContent, 
@@ -77,6 +117,15 @@ export const useFocusedReaderScores = (
     return questions.every((_, i) => !!partAnswers[i]);
   }, [currentPart, currentPartIndex, answers.focusedReader]);
 
+  const isCriticalThinkingCompleted = useMemo(() => {
+    const ct = getFocusedReaderCriticalThinking(content, currentPartIndex);
+    if (!ct?.instructions || ct.instructions.length === 0) {
+      return false;
+    }
+    const writingAnswers = answers.writing || {};
+    return ct.instructions.every((_, i) => !!writingAnswers[i]?.trim());
+  }, [content, currentPartIndex, answers.writing]);
+
   const calculateReportData = (
     lessonTitle: string,
     studentName: string,
@@ -105,6 +154,20 @@ export const useFocusedReaderScores = (
       maxOverallScore += part.questions.length;
     });
 
+    const ctQuestions = getAllFocusedReaderCriticalThinkingQuestions(content);
+    const writtenResponses: ReportWrittenResponse[] = 
+      ctQuestions.length > 0
+        ? ctQuestions.map((questionText, i) => ({
+            question: questionText,
+            answer: (answers.writing && answers.writing[i]) || ''
+          }))
+        : (content.activities?.writtenExpression?.questions
+            ? content.activities.writtenExpression.questions.map((q, i) => ({
+                question: q.text,
+                answer: (answers.writing && answers.writing[i]) || ''
+              }))
+            : []);
+
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
     const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -118,6 +181,7 @@ export const useFocusedReaderScores = (
       totalScore,
       maxScore: maxOverallScore,
       pills,
+      writtenResponses
     };
   };
 
@@ -128,6 +192,7 @@ export const useFocusedReaderScores = (
     comprehensionScore,
     comprehensionTotal: currentPart?.questions?.length || 0,
     isComprehensionCompleted,
+    isCriticalThinkingCompleted,
     calculateReportData
   };
 };

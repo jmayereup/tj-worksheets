@@ -5,9 +5,16 @@ import { CriticalThinkingActivity } from '../../types';
 interface Props {
   data: CriticalThinkingActivity;
   className?: string;
+  savedAnswers?: Record<number, string>;
+  onChange?: (answers: Record<number, string>) => void;
 }
 
-export const CriticalThinkingExtension: React.FC<Props> = ({ data, className = '' }) => {
+export const CriticalThinkingExtension: React.FC<Props> = ({
+  data,
+  className = '',
+  savedAnswers = {},
+  onChange
+}) => {
   if (!data || !data.instructions || data.instructions.length === 0) return null;
 
   return (
@@ -21,23 +28,43 @@ export const CriticalThinkingExtension: React.FC<Props> = ({ data, className = '
         </h2>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         {data.instructions.map((instruction, index) => (
-          <div key={index} className="flex gap-4 items-start">
-            <span className="shrink-0 w-8 h-8 bg-white border-2 border-amber-100 rounded-full flex items-center justify-center font-bold text-amber-700 shadow-sm">
-              {index + 1}
-            </span>
-            <p className="text-amber-800 text-lg leading-relaxed pt-0.5">
-              {instruction}
-            </p>
+          <div key={index} className="space-y-3">
+            <div className="flex gap-4 items-start">
+              <span className="shrink-0 w-8 h-8 bg-white border-2 border-amber-200 rounded-full flex items-center justify-center font-bold text-amber-700 shadow-sm text-sm">
+                {index + 1}
+              </span>
+              <p className="text-amber-950 font-medium text-base sm:text-lg leading-relaxed pt-0.5">
+                {instruction}
+              </p>
+            </div>
+            {onChange && (
+              <div className="pl-0 sm:pl-12">
+                <textarea
+                  className="w-full p-4 border border-amber-200 bg-white rounded-xl focus:ring-2 focus:ring-amber-400 focus:border-transparent outline-none transition-all min-h-[100px] text-base sm:text-lg text-gray-800 placeholder-gray-400 shadow-sm"
+                  placeholder="Write your answer here..."
+                  value={savedAnswers[index] || ''}
+                  onChange={(e) => {
+                    const newAnswers = { ...savedAnswers, [index]: e.target.value };
+                    onChange(newAnswers);
+                  }}
+                />
+              </div>
+            )}
           </div>
         ))}
       </div>
       
-      <div className="mt-6 pt-6 border-t border-amber-200/50 flex items-center gap-2 text-amber-600/70 text-sm font-medium italic">
-        <Lightbulb className="w-4 h-4" />
-        <span>Use these questions for personal reflection or group discussion.</span>
+      <div className="mt-6 pt-4 border-t border-amber-200/50 flex items-center gap-2 text-amber-700/80 text-sm font-medium italic">
+        <Lightbulb className="w-4 h-4 shrink-0" />
+        <span>
+          {onChange 
+            ? 'Write your responses in the boxes above. They will be included in your report card.' 
+            : 'Use these questions for personal reflection or group discussion.'}
+        </span>
       </div>
     </section>
   );
 };
+

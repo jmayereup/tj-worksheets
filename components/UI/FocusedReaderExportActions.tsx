@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Printer, Copy, Check } from 'lucide-react';
 import { ParsedLesson, FocusedReaderContent } from '../../types';
 import { seededShuffle } from '../../utils/textUtils';
+import { getFocusedReaderCriticalThinking } from '../../hooks/useFocusedReaderScores';
 
 interface FocusedReaderExportActionsProps {
   lesson: ParsedLesson & { content: FocusedReaderContent };
@@ -95,6 +96,22 @@ ${questionsHtml}
 `;
     }).join('<hr style="border:0;border-top:1px dashed #ccc;margin:16px 0">');
 
+    const ct = getFocusedReaderCriticalThinking(content);
+    let criticalThinkingHtml = '';
+    if (ct && ct.instructions && ct.instructions.length > 0) {
+      criticalThinkingHtml = `
+<hr style="border:0;border-top:1px dashed #ccc;margin:16px 0">
+<h2 style="font-size:14px;font-weight:bold;background:#f3f4f6;padding:4px 6px;margin:12px 0 6px">${ct.title || 'Critical Thinking & Discussion'}</h2>
+${ct.instructions.map((instruction, i) => `
+<div style="margin:8px 0">
+<p style="font-size:12px;font-weight:bold;margin:4px 0 2px">${i + 1}. ${instruction}</p>
+<p style="border-bottom:1px solid #ccc;margin:3px 0 10px">&nbsp;</p>
+<p style="border-bottom:1px solid #ccc;margin:3px 0 10px">&nbsp;</p>
+</div>
+`).join('')}
+`;
+    }
+
     const html = `
 <!DOCTYPE html><html><body style="font-family:Arial,sans-serif;max-width:750px;margin:0 auto;padding:16px;font-size:13px">
 <div style="text-align:right;font-size:13px;margin-bottom:16px;color:#333;">
@@ -108,6 +125,7 @@ Name <u>&nbsp;&nbsp;&nbsp;&nbsp;${studentName || '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 ${originalImageUrl ? `<div style="text-align:center;margin:16px 0"><img src="${originalImageUrl}" alt="Lesson image" style="max-width:100%;height:auto;border-radius:6px" /></div>` : ''}
 
 ${partsHtml}
+${criticalThinkingHtml}
 
 </body></html>`;
 
