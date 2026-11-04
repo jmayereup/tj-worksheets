@@ -3,26 +3,36 @@ export interface ComponentConfig {
   script: string;
 }
 
-export const getComponentConfig = (lessonType: string): ComponentConfig | null => {
+export const getComponentConfig = (
+  lessonType: string,
+  options?: { forExport?: boolean }
+): ComponentConfig | null => {
+  const isExport = options?.forExport ?? false;
+  const baseUrl = (!isExport && typeof import.meta !== 'undefined' && import.meta.env?.DEV)
+    ? (import.meta.env.VITE_SCRIPTS_BASE_URL || '/@tj-components')
+    : (import.meta.env?.VITE_SCRIPTS_BASE_URL || 'https://scripts.teacherjake.com');
+
+  const cleanBaseUrl = baseUrl.replace(/\/$/, '');
+
   switch (lessonType) {
     case 'lbl-reader':
-      return { tag: 'lbl-reader', script: 'https://scripts.teacherjake.com/tj-reader.js' };
+      return { tag: 'lbl-reader', script: `${cleanBaseUrl}/tj-reader.js` };
     case 'grammar-hearts':
-      return { tag: 'tj-grammar-hearts', script: 'https://scripts.teacherjake.com/tj-grammar-hearts.js' };
+      return { tag: 'tj-grammar-hearts', script: `${cleanBaseUrl}/tj-grammar-hearts.js` };
 
     case 'listening':
-      return { tag: 'tj-listening', script: 'https://scripts.teacherjake.com/tj-listening.js' };
+      return { tag: 'tj-listening', script: `${cleanBaseUrl}/tj-listening.js` };
     case 'speed-review':
-      return { tag: 'tj-speed-review', script: 'https://scripts.teacherjake.com/tj-speed-review.js' };
+      return { tag: 'tj-speed-review', script: `${cleanBaseUrl}/tj-speed-review.js` };
     case 'chapter-book':
-      return { tag: 'tj-chapter-book', script: 'https://scripts.teacherjake.com/tj-chapter-book.js' };
+      return { tag: 'tj-chapter-book', script: `${cleanBaseUrl}/tj-chapter-book.js` };
     case 'pronunciation':
-      return { tag: 'tj-pronunciation', script: 'https://scripts.teacherjake.com/tj-pronunciation.js' };
+      return { tag: 'tj-pronunciation', script: `${cleanBaseUrl}/tj-pronunciation.js` };
     case 'quiz-element':
-      return { tag: 'tj-quiz-element', script: 'https://scripts.teacherjake.com/tj-quiz-element.js' };
+      return { tag: 'tj-quiz-element', script: `${cleanBaseUrl}/tj-quiz-element.js` };
     case 'tj-test':
     case 'test':
-      return { tag: 'tj-test', script: 'https://scripts.teacherjake.com/tj-test.js' };
+      return { tag: 'tj-test', script: `${cleanBaseUrl}/tj-test.js` };
     default:
       return null;
   }

@@ -152,7 +152,7 @@ const buildCustomElementHtml = (
 };
 
 export const compileLessonHtml = (lesson: any, rawHtml: string, overrideSubmissionUrl?: string): string => {
-  const componentConfig = getComponentConfig(lesson.lessonType);
+  const componentConfig = getComponentConfig(lesson.lessonType, { forExport: true });
   const title = lesson.title || 'Interactive Worksheet';
   const description = lesson.seo || '';
   const language = lesson.language || '';
