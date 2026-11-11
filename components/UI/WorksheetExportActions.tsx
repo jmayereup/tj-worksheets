@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Printer, Copy, Check } from 'lucide-react';
 import { ParsedLesson, StandardLessonContent } from '../../types';
 import { seededShuffle, getSentenceWords } from '../../utils/textUtils';
+import { TextSizeControl } from './TextSizeControl';
+import { useTextSize } from '../../context/TextSizeContext';
 
 interface WorksheetExportActionsProps {
   lesson: ParsedLesson & { content: StandardLessonContent };
@@ -19,6 +21,7 @@ export const WorksheetExportActions: React.FC<WorksheetExportActionsProps> = ({
   homeroom,
 }) => {
   const [copySuccess, setCopySuccess] = useState(false);
+  const { textSizeLevel, decreaseTextSize, increaseTextSize } = useTextSize();
   const standardContent = lesson.content;
 
   const handleCopyForGoogleDocs = async () => {
@@ -106,7 +109,12 @@ ${standardContent.activities.writtenExpression.questions.map((q, i) => `<p style
 
   return (
     <div className="max-w-4xl mx-auto mb-4 print:hidden">
-      <div className="flex gap-3 justify-center">
+      <div className="flex items-center gap-3 justify-center">
+        <TextSizeControl
+          textSizeLevel={textSizeLevel}
+          onDecrease={decreaseTextSize}
+          onIncrease={increaseTextSize}
+        />
         <button onClick={handleCopyForGoogleDocs} className={btnClass}>
           {copySuccess ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
           {copySuccess ? 'Copied!' : 'Copy'}

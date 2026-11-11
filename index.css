@@ -96,6 +96,99 @@ tj-chapter-book {
     width: 100%;
 }
 
+/* ==========================================================================
+   Interactive Text Size Scaling System
+   Overrides Tailwind v4 font-size and line-height variables on the container
+   so that every activity (passage, vocab, questions, blanks, scrambles) scales.
+   ========================================================================== */
+@media screen {
+    /* Standard Latin / Default Lessons */
+    .tj-printable-worksheet[data-text-size="0"] {
+        --text-xs: 0.7rem;
+        --text-sm: 0.8rem;
+        --text-base: 0.9rem;
+        --text-lg: 1rem;
+        --text-xl: 1.125rem;
+        --text-2xl: 1.35rem;
+        --text-3xl: 1.65rem;
+    }
+
+    .tj-printable-worksheet[data-text-size="2"] {
+        --text-xs: 0.85rem;
+        --text-sm: 1rem;
+        --text-base: 1.15rem;
+        --text-lg: 1.3rem;
+        --text-xl: 1.45rem;
+        --text-2xl: 1.75rem;
+        --text-3xl: 2.15rem;
+    }
+
+    .tj-printable-worksheet[data-text-size="3"] {
+        --text-xs: 0.95rem;
+        --text-sm: 1.125rem;
+        --text-base: 1.3rem;
+        --text-lg: 1.5rem;
+        --text-xl: 1.7rem;
+        --text-2xl: 2.05rem;
+        --text-3xl: 2.5rem;
+    }
+
+    /* Thai Lessons: optically calibrated so Thai consonants match Latin visual weight,
+       with generous line-heights to clear multi-tiered tone markers and vowels */
+    .tj-printable-worksheet[data-is-thai="true"][data-text-size="0"] {
+        --text-xs: 0.8rem;
+        --text-sm: 0.95rem;
+        --text-base: 1.05rem;
+        --text-lg: 1.2rem;
+        --text-xl: 1.35rem;
+        --text-2xl: 1.6rem;
+        --text-3xl: 1.95rem;
+        --text-base--line-height: 1.7;
+        --text-lg--line-height: 1.75;
+        --text-xl--line-height: 1.75;
+    }
+
+    .tj-printable-worksheet[data-is-thai="true"][data-text-size="1"],
+    .tj-printable-worksheet[data-is-thai="true"]:not([data-text-size]) {
+        --text-xs: 0.875rem;
+        --text-sm: 1.05rem;
+        --text-base: 1.18rem;
+        --text-lg: 1.35rem;
+        --text-xl: 1.5rem;
+        --text-2xl: 1.8rem;
+        --text-3xl: 2.25rem;
+        --text-base--line-height: 1.7;
+        --text-lg--line-height: 1.75;
+        --text-xl--line-height: 1.75;
+    }
+
+    .tj-printable-worksheet[data-is-thai="true"][data-text-size="2"] {
+        --text-xs: 1rem;
+        --text-sm: 1.18rem;
+        --text-base: 1.32rem;
+        --text-lg: 1.5rem;
+        --text-xl: 1.7rem;
+        --text-2xl: 2.05rem;
+        --text-3xl: 2.55rem;
+        --text-base--line-height: 1.7;
+        --text-lg--line-height: 1.75;
+        --text-xl--line-height: 1.75;
+    }
+
+    .tj-printable-worksheet[data-is-thai="true"][data-text-size="3"] {
+        --text-xs: 1.1rem;
+        --text-sm: 1.3rem;
+        --text-base: 1.48rem;
+        --text-lg: 1.7rem;
+        --text-xl: 1.95rem;
+        --text-2xl: 2.35rem;
+        --text-3xl: 2.9rem;
+        --text-base--line-height: 1.7;
+        --text-lg--line-height: 1.75;
+        --text-xl--line-height: 1.75;
+    }
+}
+
 /* Styles for HTML content injected into worksheets (reversing Tailwind's Preflight resets) */
 .tj-html-content h1 {
     font-size: 1.75rem;

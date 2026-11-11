@@ -12,6 +12,7 @@ import { LessonMedia } from '../UI/LessonMedia';
 
 
 import { fetchTeacherSubmissionUrl } from '../../services/pocketbase';
+import { TextSizeProvider, useTextSize } from '../../context/TextSizeContext';
 
 const InformationGapView = React.lazy(() => import('./InformationGapView').then(m => ({ default: m.InformationGapView })));
 const WorksheetView = React.lazy(() => import('./WorksheetView').then(m => ({ default: m.WorksheetView })));
@@ -48,7 +49,7 @@ const isChapterBook = (content: LessonContent): content is ChapterBookContent =>
   return content !== null && typeof content === 'object' && 'chapters' in content && Array.isArray((content as any).chapters);
 };
 
-export const LessonView: React.FC<Props> = ({ lesson, teacherCode, submissionUrl }) => {
+const LessonViewContent: React.FC<Props> = ({ lesson, teacherCode, submissionUrl }) => {
   const isStandard = isStandardLesson(lesson.content);
   const isFocused = isFocusedReader(lesson.content);
   const isBlaster = isWordBlaster(lesson.content);
@@ -56,6 +57,21 @@ export const LessonView: React.FC<Props> = ({ lesson, teacherCode, submissionUrl
   const isChapter = isChapterBook(lesson.content);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const htmlContent = lesson.html || '';
+
+  const { textSizeLevel } = useTextSize();
+
+  const isThai = React.useMemo(() => {
+    const lang = (lesson.language || '').toLowerCase();
+    const content = lesson.content;
+    const sampleText = isStandard
+      ? (content as StandardLessonContent).readingText
+      : isFocused
+      ? (content as FocusedReaderContent).parts?.[0]?.text
+      : isChapter
+      ? (content as ChapterBookContent).chapters?.[0]?.content?.join(' ')
+      : '';
+    return ['thai', 'th'].includes(lang) || /[\u0E00-\u0E7F]/.test(sampleText || '') || /[\u0E00-\u0E7F]/.test(lesson.title || '');
+  }, [lesson, isStandard, isFocused, isChapter]);
 
   // Determine effective lesson type - trust explicit database field first, fall back to structure detection
   const effectiveLessonType = lesson.lessonType || (
@@ -403,7 +419,12 @@ export const LessonView: React.FC<Props> = ({ lesson, teacherCode, submissionUrl
   );
 
   return (
-    <div ref={containerRef} className="bg-white max-w-4xl mx-auto pb-4 px-1 py-4 sm:px-6 tj-printable-worksheet">
+    <div
+      ref={containerRef}
+      data-text-size={textSizeLevel}
+      data-is-thai={isThai ? "true" : undefined}
+      className="bg-white max-w-4xl mx-auto pb-4 px-1 py-4 sm:px-6 tj-printable-worksheet transition-all duration-150"
+    >
       {/* Page Title - Unified Layout */}
       <div className="mb-4 text-center print:hidden">
         <h1 className="text-3xl md:text-4xl font-black text-green-900 mb-2 tracking-tight">
@@ -487,3 +508,9 @@ export const LessonView: React.FC<Props> = ({ lesson, teacherCode, submissionUrl
     </div>
   );
 };
+
+export const LessonView: React.FC<Props> = (props) => (
+  <TextSizeProvider>
+    <LessonViewContent {...props} />
+  </TextSizeProvider>
+);
