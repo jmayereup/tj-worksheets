@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { FocusedReaderContent, ChapterBookContent, ParsedLesson, VocabWord, ScrambledItem, FillInBlankItem } from '../../types';
+import { getSentenceWords } from '../../utils/textUtils';
 import { Scrambled } from '../Activities/Scrambled';
 import { FillInBlanks } from '../Activities/FillInBlanks';
 import { WordBlasterGame } from '../Activities/WordBlasterGame';
@@ -118,7 +119,7 @@ export const PracticeGamesModal: React.FC<Props> = ({
       .filter(s => {
         // filter out empty or very short strings
         if (s.length < 10) return false;
-        const wordCount = s.split(/[\s]+/).filter(Boolean).length;
+        const wordCount = getSentenceWords(s, lesson.language).length;
         // Limit word count to make it a short phrase/sentence (e.g. 3 to 12 words)
         return wordCount >= 3 && wordCount <= 12;
       });

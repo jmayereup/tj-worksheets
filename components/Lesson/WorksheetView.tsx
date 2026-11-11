@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ParsedLesson, StandardLessonContent, UserAnswers, ReportData, CompletionStates } from '../../types';
-import { seededShuffle } from '../../utils/textUtils';
+import { seededShuffle, getSentenceWords } from '../../utils/textUtils';
 import { Vocabulary } from '../Activities/Vocabulary';
 import { FillInBlanks } from '../Activities/FillInBlanks';
 import { Comprehension } from '../Activities/Comprehension';
@@ -131,14 +131,14 @@ export const WorksheetView: React.FC<WorksheetViewProps> = ({
 
   const printScrambledItems = useMemo(() => {
     return (standardContent.activities?.scrambled || []).map((item, idx) => {
-      const words = (item.answer || '').replace(/[.!?]+$/, '').split(/\s+/).filter(w => w);
+      const words = getSentenceWords(item.answer || '', lesson.language);
       const shuffled = seededShuffle([...words], `${lesson.id}-print-scramble-${idx}`);
       return {
         ...item,
         scrambledText: shuffled.join(' / ')
       };
     });
-  }, [standardContent, lesson.id]);
+  }, [standardContent, lesson.id, lesson.language]);
 
   const optimizedImageUrl = useMemo(() => {
     if (!lesson.imageUrl) return undefined;

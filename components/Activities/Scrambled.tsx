@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ScrambledItem } from '../../types';
-import { normalizeString, shouldShowAudioControls, seededShuffle } from '../../utils/textUtils';
+import { normalizeString, shouldShowAudioControls, seededShuffle, getSentenceWords } from '../../utils/textUtils';
 import { Button } from '../UI/Button';
 import { RefreshCw, SkipForward } from 'lucide-react';
 import { AudioControls } from '../UI/AudioControls';
@@ -54,10 +54,8 @@ export const Scrambled: React.FC<Props> = ({
   useEffect(() => {
     // Reset local state when question changes
     if (currentItem && activityMode === 'scramble') {
-      // Create fresh word tokens
-      const words = currentItem.answer
-        .replace(/[.!?]+$/, '')
-        .split(/\s+/)
+      // Create fresh word tokens using language-aware segmentation
+      const words = getSentenceWords(currentItem.answer, language)
         .map((text, i) => ({ id: i, text }));
 
       // Shuffle deterministically
@@ -71,12 +69,13 @@ export const Scrambled: React.FC<Props> = ({
       setIsChecked(false);
       setIsCorrectState(false);
     }
-  }, [currentIndex, currentItem, activityMode, lessonId]);
+  }, [currentIndex, currentItem, activityMode, lessonId, language]);
 
   // Sync formed sentence to parent state
   useEffect(() => {
     if (activityMode === 'scramble') {
-      const currentSentence = formedSentence.map(w => w.text).join(' ');
+      const isThai = (language && ['thai', 'th'].includes(language.toLowerCase())) || /[\u0E00-\u0E7F]/.test(currentItem?.answer || '');
+      const currentSentence = formedSentence.map(w => w.text).join(isThai ? '' : ' ');
       const savedSentence = savedAnswers[currentIndex] || '';
 
       // Only update if different to avoid loops
@@ -84,7 +83,7 @@ export const Scrambled: React.FC<Props> = ({
         onChange({ ...savedAnswers, [currentIndex]: currentSentence });
       }
     }
-  }, [formedSentence, currentIndex, activityMode, savedAnswers, onChange]);
+  }, [formedSentence, currentIndex, activityMode, savedAnswers, onChange, language, currentItem]);
 
   const moveWordToSentence = (wordId: number) => {
     if (isCorrectState) return;
@@ -115,12 +114,13 @@ export const Scrambled: React.FC<Props> = ({
   const checkAnswer = () => {
     setIsChecked(true);
 
+    const isThai = (language && ['thai', 'th'].includes(language.toLowerCase())) || /[\u0E00-\u0E7F]/.test(currentItem.answer);
     // Use local state for validation to ensure what user sees is what is checked
     const currentAnswer = activityMode === 'scramble'
-      ? formedSentence.map(w => w.text).join(' ')
+      ? formedSentence.map(w => w.text).join(isThai ? '' : ' ')
       : (savedAnswers[currentIndex] || '');
 
-    const isCorrect = normalizeString(currentAnswer) === normalizeString(currentItem.answer);
+    const isCorrect = normalizeString(currentAnswer, language) === normalizeString(currentItem.answer, language);
 
     if (isCorrect) {
       setIsCorrectState(true);
@@ -154,7 +154,7 @@ export const Scrambled: React.FC<Props> = ({
 
   if (isCompleted) {
     const totalCorrect = data.reduce((acc, item, idx) => {
-      return normalizeString(savedAnswers[idx] || '') === normalizeString(item.answer) ? acc + 1 : acc;
+      return normalizeString(savedAnswers[idx] || '', language) === normalizeString(item.answer, language) ? acc + 1 : acc;
     }, 0);
     return (
       <section className="mb-8 relative text-center">
@@ -175,7 +175,7 @@ export const Scrambled: React.FC<Props> = ({
   }
 
   const userAnswer = savedAnswers[currentIndex] || '';
-  const isCorrect = normalizeString(userAnswer) === normalizeString(currentItem?.answer || '');
+  const isCorrect = normalizeString(userAnswer, language) === normalizeString(currentItem?.answer || '', language);
 
   return (
     <section className="mb-8 relative">

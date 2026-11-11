@@ -1,10 +1,41 @@
 import { speak } from './tts';
 
-export const normalizeString = (str: string): string => {
+export const normalizeString = (str: string, language?: string): string => {
   if (!str) return '';
+  const isThai = (language && ['thai', 'th'].includes(language.toLowerCase())) || /[\u0E00-\u0E7F]/.test(str);
   // Remove all punctuation and normalize whitespace (mobile browsers can add extra spaces)
   // Included smart quotes (curly quotes) which are common on iOS
-  return str.trim().toLowerCase().replace(/[.!,?;:"'()\[\]{}‘’“”]/g, '').replace(/\s+/g, ' ').trim();
+  const cleaned = str.trim().toLowerCase().replace(/[.!,?;:"'()\[\]{}‘’“”]/g, '');
+  if (isThai) {
+    // In Thai, sentences have no standard inter-word spaces; strip whitespace for robust comparison
+    return cleaned.replace(/\s+/g, '');
+  }
+  return cleaned.replace(/\s+/g, ' ').trim();
+};
+
+export const getSentenceWords = (text: string, language?: string): string[] => {
+  if (!text) return [];
+  const clean = text.replace(/[.!?。！？]+$/, '').trim();
+  if (!clean) return [];
+
+  const isThai = (language && ['thai', 'th'].includes(language.toLowerCase())) || /[\u0E00-\u0E7F]/.test(clean);
+
+  if (isThai && typeof Intl !== 'undefined' && (Intl as any).Segmenter) {
+    try {
+      const segmenter = new (Intl as any).Segmenter('th', { granularity: 'word' });
+      const segments = Array.from(segmenter.segment(clean)) as any[];
+      const words = segments
+        .filter((s: any) => s.isWordLike && s.segment.trim().length > 0)
+        .map((s: any) => s.segment.trim());
+      if (words.length > 0) {
+        return words;
+      }
+    } catch (e) {
+      console.warn('Thai segmentation failed, falling back to whitespace:', e);
+    }
+  }
+
+  return clean.split(/\s+/).filter(w => w.length > 0);
 };
 
 export const shuffleArray = <T,>(array: T[]): T[] => {

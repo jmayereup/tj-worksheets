@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Printer, Copy, Check } from 'lucide-react';
 import { ParsedLesson, StandardLessonContent } from '../../types';
-import { seededShuffle } from '../../utils/textUtils';
+import { seededShuffle, getSentenceWords } from '../../utils/textUtils';
 
 interface WorksheetExportActionsProps {
   lesson: ParsedLesson & { content: StandardLessonContent };
@@ -44,8 +44,8 @@ export const WorksheetExportActions: React.FC<WorksheetExportActionsProps> = ({
     const originalImageUrl = getOriginalImageUrl();
 
     const vocabItems = seededShuffle([...standardContent.activities.vocabulary.items], `${lesson.id}-print-vocab`);
-    const scrambledItems = standardContent.activities.scrambled.map((item, idx) => {
-      const words = item.answer.replace(/[.!?]+$/, '').split(/\s+/).filter((w: string) => w);
+    const scrambledItems = (standardContent.activities?.scrambled || []).map((item, idx) => {
+      const words = getSentenceWords(item.answer, lesson.language);
       const shuffled = seededShuffle([...words], `${lesson.id}-print-scramble-${idx}`);
       return { ...item, scrambledText: shuffled.join(' / ') };
     });
