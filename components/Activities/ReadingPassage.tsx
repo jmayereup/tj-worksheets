@@ -1,10 +1,30 @@
-import React, { ReactNode, useState, useRef, useEffect } from 'react';
+import React, { ReactNode, useState, useRef, useEffect, useMemo } from 'react';
 import { HelpCircle, X, BookOpen, Volume2, Turtle, ChevronDown, ChevronUp, ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react';
 import { AudioControls } from '../UI/AudioControls';
 import { TranslateButton } from '../UI/TranslateButton';
+import { TextSizeControl } from '../UI/TextSizeControl';
 import { Button } from '../UI/Button';
 import { speakText } from '../../utils/textUtils';
 import { WordLookupToast } from '../UI/WordLookupToast';
+
+const FONT_SIZE_CLASSES: Record<number, { latin: string; thai: string }> = {
+  0: { // Small
+    latin: "text-base leading-7",
+    thai: "text-lg sm:text-xl leading-8 sm:leading-9",
+  },
+  1: { // Normal / Default (Notice Thai is calibrated larger by default to offset em-box compression)
+    latin: "text-lg leading-8",
+    thai: "text-xl sm:text-2xl leading-9 sm:leading-10",
+  },
+  2: { // Large
+    latin: "text-xl leading-9",
+    thai: "text-2xl sm:text-3xl leading-10 sm:leading-[2.75rem]",
+  },
+  3: { // Extra Large
+    latin: "text-2xl leading-10",
+    thai: "text-3xl sm:text-4xl leading-[2.75rem] sm:leading-[3.25rem]",
+  },
+};
 
 interface ReadingPassageProps {
   text: string;
@@ -62,6 +82,43 @@ export const ReadingPassage: React.FC<ReadingPassageProps> = ({
   const [selectedWord, setSelectedWord] = useState<string | null>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const selectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  const isThai = useMemo(() => {
+    const langLower = (language || '').toLowerCase();
+    return langLower === 'thai' || langLower === 'th' || /[\u0E00-\u0E7F]/.test(text || '');
+  }, [language, text]);
+
+  const [textSizeLevel, setTextSizeLevel] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('tj-reading-text-size-level');
+        if (saved !== null) {
+          const parsed = parseInt(saved, 10);
+          if (!isNaN(parsed) && parsed >= 0 && parsed <= 3) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        // Ignore localStorage errors (e.g. sandboxed environments)
+      }
+    }
+    return 1; // Default: Level 1 (Normal)
+  });
+
+  const handleTextSizeChange = (newLevel: number) => {
+    setTextSizeLevel(newLevel);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('tj-reading-text-size-level', newLevel.toString());
+      } catch (e) {
+        // Ignore
+      }
+    }
+  };
+
+  const activeSizeClass = isThai 
+    ? (FONT_SIZE_CLASSES[textSizeLevel]?.thai || FONT_SIZE_CLASSES[1].thai)
+    : (FONT_SIZE_CLASSES[textSizeLevel]?.latin || FONT_SIZE_CLASSES[1].latin);
 
   const handleTouchStart = (e: React.TouchEvent) => {
     if (onSwipeLeft || onSwipeRight) {
@@ -303,7 +360,12 @@ export const ReadingPassage: React.FC<ReadingPassageProps> = ({
           <h2 className="text-xl font-black text-green-900 uppercase tracking-tight wrap-break-word">{title}</h2>
         </div>
         
-        <div className="flex gap-2 shrink-0 self-end sm:self-auto">
+        <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto flex-wrap">
+          <TextSizeControl
+            textSizeLevel={textSizeLevel}
+            onDecrease={() => handleTextSizeChange(Math.max(0, textSizeLevel - 1))}
+            onIncrease={() => handleTextSizeChange(Math.min(3, textSizeLevel + 1))}
+          />
           {onTranslate && <TranslateButton onClick={onTranslate} />}
           <AudioControls 
             onVoiceOpen={onVoiceOpen}
@@ -320,7 +382,7 @@ export const ReadingPassage: React.FC<ReadingPassageProps> = ({
 
       <div className="mx-0">
         <div
-          className="max-w-none justify-baseline text-lg leading-8 text-gray-800 bg-transparent whitespace-pre-wrap select-text"
+          className={`max-w-none justify-baseline ${activeSizeClass} text-gray-800 bg-transparent whitespace-pre-wrap select-text transition-all duration-150`}
           translate="no"
         >
           {renderTextWithVocabulary()}

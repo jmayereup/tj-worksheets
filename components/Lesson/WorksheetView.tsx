@@ -406,7 +406,7 @@ export const WorksheetView: React.FC<WorksheetViewProps> = ({
           )}
           <section>
             <h2 className="text-sm font-bold mb-1 bg-gray-100 px-2 py-1">Reading Passage</h2>
-            <p className="text-xs leading-relaxed whitespace-pre-wrap">{standardContent.readingText}</p>
+            <p className={`whitespace-pre-wrap ${/[\u0E00-\u0E7F]/.test(standardContent.readingText) ? 'text-sm leading-loose' : 'text-xs leading-relaxed'}`}>{standardContent.readingText}</p>
           </section>
 
           <section>
