@@ -136,11 +136,44 @@ export const useFocusedReaderScores = (
     let totalScore = 0;
     let maxOverallScore = 0;
 
-    content.parts.forEach((part, pIdx) => {
+    (content.parts || []).forEach((part, pIdx) => {
+      // Vocabulary score
+      const vocabExplanations = part.vocabulary_explanations || {};
+      const words = Object.keys(vocabExplanations);
+      const wordIndices = words.map((_, i) => i);
+
+      if (wordIndices.length > 0) {
+        // Replicate subsetting logic
+        const partLessonId = `${lessonId}-part-${pIdx}`;
+        const allShuffledIndices = seededShuffle(wordIndices, `${partLessonId}-vocab-subset-seed`);
+        const subsetIndices = allShuffledIndices.slice(0, 5);
+
+        let partVocabScore = 0;
+        const vocabAnswers = answers.vocabulary || {};
+
+        subsetIndices.forEach((index) => {
+          const answerKey = `vocab_${pIdx}_${index}`;
+          const userAnswer = vocabAnswers[answerKey] || '';
+          const correctChar = String.fromCharCode(97 + index);
+          if (userAnswer.toLowerCase() === correctChar) {
+            partVocabScore++;
+          }
+        });
+
+        pills.push({
+          label: `Part ${part.part_number} Vocab`,
+          score: partVocabScore,
+          total: subsetIndices.length
+        });
+        totalScore += partVocabScore;
+        maxOverallScore += subsetIndices.length;
+      }
+
       // Questions score
       let partScore = 0;
       const partAnswers = answers.focusedReader?.[pIdx] || {};
-      part.questions.forEach((q, qIdx) => {
+      const questions = part.questions || [];
+      questions.forEach((q, qIdx) => {
         if (partAnswers[qIdx] === q.answer) {
           partScore++;
         }
@@ -148,10 +181,10 @@ export const useFocusedReaderScores = (
       pills.push({
         label: `Part ${part.part_number} Questions`,
         score: partScore,
-        total: part.questions.length
+        total: questions.length
       });
       totalScore += partScore;
-      maxOverallScore += part.questions.length;
+      maxOverallScore += questions.length;
     });
 
     const ctQuestions = getAllFocusedReaderCriticalThinkingQuestions(content);
