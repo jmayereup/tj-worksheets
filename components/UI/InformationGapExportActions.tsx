@@ -88,14 +88,15 @@ ${myQuestions.map((q: any) => `
         playerHtml += textHtml + questionsHtml;
       });
       
+      const playerLabel = `Player ${String.fromCharCode(64 + playerNum)}`;
       return `
 <div style="text-align:right;font-size:13px;margin-bottom:16px;color:#333;">
 Name <u>&nbsp;&nbsp;&nbsp;&nbsp;${studentName || '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'}&nbsp;&nbsp;&nbsp;&nbsp;</u>
 &nbsp;&nbsp;&nbsp;&nbsp;ID: <u>&nbsp;&nbsp;&nbsp;&nbsp;${studentId || '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'}&nbsp;&nbsp;&nbsp;&nbsp;</u>
 &nbsp;&nbsp;&nbsp;&nbsp;Homeroom: <u>&nbsp;&nbsp;&nbsp;&nbsp;${homeroom || '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'}&nbsp;&nbsp;&nbsp;&nbsp;_</u>
 </div>
-<h1 style="font-size:18px;font-weight:bold;margin:0 0 4px 0">${displayTitle} - Player ${playerNum}</h1>
-<p style="color:#666;margin:0 0 16px 0;font-size:11px">Language: ${lesson.language} | Level: ${lesson.level} | Role: Player ${playerNum}</p>
+<h1 style="font-size:18px;font-weight:bold;margin:0 0 4px 0">${displayTitle} - ${playerLabel}</h1>
+<p style="color:#666;margin:0 0 16px 0;font-size:11px">Language: ${lesson.language} | Level: ${lesson.level} | Role: ${playerLabel}</p>
 
 ${originalImageUrl ? `<div style="text-align:center;margin:16px 0"><img src="${originalImageUrl}" alt="Lesson image" style="max-width:100%;height:auto;border-radius:6px" /></div>` : ''}
 

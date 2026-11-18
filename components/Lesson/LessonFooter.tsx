@@ -14,6 +14,7 @@ interface LessonFooterProps {
   onFinish: () => void;
   onReset: () => void;
   footerRef?: React.RefObject<HTMLDivElement | null>;
+  showSubmission?: boolean;
 }
 
 export const LessonFooter: React.FC<LessonFooterProps> = ({
@@ -27,19 +28,22 @@ export const LessonFooter: React.FC<LessonFooterProps> = ({
   onFinish,
   onReset,
   footerRef,
+  showSubmission = true,
 }) => {
   return (
     <div ref={footerRef} className="tj-lesson-footer flex flex-col items-center gap-4 py-2 animate-fade-in print:hidden">
-      <SubmissionSection 
-        studentName={studentName}
-        setStudentName={setStudentName}
-        studentId={studentId}
-        setStudentId={setStudentId}
-        homeroom={homeroom}
-        setHomeroom={setHomeroom}
-        isNameLocked={isNameLocked}
-        onFinish={onFinish}
-      />
+      {showSubmission && (
+        <SubmissionSection 
+          studentName={studentName}
+          setStudentName={setStudentName}
+          studentId={studentId}
+          setStudentId={setStudentId}
+          homeroom={homeroom}
+          setHomeroom={setHomeroom}
+          isNameLocked={isNameLocked}
+          onFinish={onFinish}
+        />
+      )}
 
       <Button
         onClick={onReset}

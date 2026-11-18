@@ -67,6 +67,7 @@ export const InformationGapView: React.FC<InformationGapViewProps> = ({
   const [isFinished, setIsFinished] = useState(false);
   const [isSinglePlayer, setIsSinglePlayer] = useState(false);
   const passageRef = React.useRef<HTMLDivElement>(null);
+  const getPlayerLabel = (num: number) => `Player ${String.fromCharCode(64 + num)}`;
   
   const optimizedImageUrl = React.useMemo(() => {
     if (!lesson.imageUrl) return undefined;
@@ -201,7 +202,7 @@ export const InformationGapView: React.FC<InformationGapViewProps> = ({
               <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Mic className="w-10 h-10 text-blue-600" />
               </div>
-              <h2 className="text-2xl font-black text-gray-800 mb-2">Player {playerNum}</h2>
+              <h2 className="text-2xl font-black text-gray-800 mb-2">{getPlayerLabel(playerNum)}</h2>
               <p className="text-gray-500 font-medium tracking-wide">Click to select this role</p>
             </button>
           ))}
@@ -245,8 +246,8 @@ export const InformationGapView: React.FC<InformationGapViewProps> = ({
                     <div className="border-b border-black w-24 text-center px-2 pb-0.5">{homeroom || ''}</div>
                   </div>
                 </div>
-                <h1 className="text-xl font-bold text-gray-900 leading-tight mb-1">{mainTitle} - Player {playerNum}</h1>
-                <p className="text-xs text-gray-500">Language: {lesson.language} | Level: {lesson.level} | Role: Player {playerNum}</p>
+                <h1 className="text-xl font-bold text-gray-900 leading-tight mb-1">{mainTitle} - {getPlayerLabel(playerNum)}</h1>
+                <p className="text-xs text-gray-500">Language: {lesson.language} | Level: {lesson.level} | Role: {getPlayerLabel(playerNum)}</p>
               </div>
 
               {/* Removed Image block */}
@@ -321,7 +322,7 @@ export const InformationGapView: React.FC<InformationGapViewProps> = ({
       )}
       <div className="flex flex-col items-center mb-8">
         <div className="inline-block bg-green-100 text-green-800 px-4 py-1 rounded-full text-sm font-black uppercase tracking-wider border border-green-200">
-          Player {currentPlayer}
+          {getPlayerLabel(currentPlayer)}
         </div>
       </div>
 
@@ -394,7 +395,7 @@ export const InformationGapView: React.FC<InformationGapViewProps> = ({
               </div>
               <div className="text-left">
                 <h3 className="text-lg font-black text-blue-900 tracking-tight leading-none mb-1">Listen to Partner's Info</h3>
-                <p className="text-xs text-blue-600 font-bold uppercase tracking-wider">Partner ({currentPlayer === 1 ? 'Player 2' : 'Player 1'})</p>
+                <p className="text-xs text-blue-600 font-bold uppercase tracking-wider">Partner ({getPlayerLabel(currentPlayer === 1 ? 2 : 1)})</p>
               </div>
             </div>
             <AudioControls
@@ -448,6 +449,7 @@ export const InformationGapView: React.FC<InformationGapViewProps> = ({
         isNameLocked={isNameLocked}
         onFinish={() => handleActivityFinish()}
         onReset={onReset}
+        showSubmission={currentActivityIndex === activities.length - 1}
       />
     </div>
   );
