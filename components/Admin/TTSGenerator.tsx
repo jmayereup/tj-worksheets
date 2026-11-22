@@ -161,14 +161,6 @@ export const TTSGenerator: React.FC<TTSGeneratorProps> = ({ onBack, onAudioGener
             const langLabel = langMap[prefix] || prefix.toUpperCase();
             name = `${langLabel}: ${formatted}`;
           }
-        } else if (selectedModelId === 'mistralai/voxtral-mini-tts-2603' && typeof id === 'string') {
-          const parts = id.split('_');
-          if (parts.length >= 3) {
-            const lang = parts[0].toUpperCase();
-            const raw = parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
-            const tone = parts[2].charAt(0).toUpperCase() + parts[2].slice(1);
-            name = `${lang}: ${raw} (${tone})`;
-          }
         } else if (selectedModelId.startsWith('google/gemini-') && typeof id === 'string') {
           const knownLabels: Record<string, string> = {
             Puck: 'Upbeat Male: Puck',
@@ -193,25 +185,11 @@ export const TTSGenerator: React.FC<TTSGeneratorProps> = ({ onBack, onAudioGener
         'en-GB': ['bf', 'bm'],
         'es-ES': ['ef', 'em'],
         'fr-FR': ['ff'],
+        'hi-IN': ['hf', 'hm'],
         'it-IT': ['if', 'im'],
         'ja-JP': ['jf', 'jm'],
         'pt-BR': ['pf', 'pm'],
         'zh-CN': ['zf', 'zm'],
-      };
-      const allowedPrefixes = mapping[activeLang];
-      if (allowedPrefixes) {
-        const filtered = normalized.filter((v) =>
-          allowedPrefixes.some((p) => typeof v.id === 'string' && v.id.startsWith(p + '_'))
-        );
-        if (filtered.length > 0) return filtered;
-      }
-    }
-
-    if (selectedModelId === 'mistralai/voxtral-mini-tts-2603' && activeLang) {
-      const mapping: Record<string, string[]> = {
-        'en-US': ['en'],
-        'en-GB': ['gb'],
-        'fr-FR': ['fr'],
       };
       const allowedPrefixes = mapping[activeLang];
       if (allowedPrefixes) {
@@ -434,12 +412,18 @@ export const TTSGenerator: React.FC<TTSGeneratorProps> = ({ onBack, onAudioGener
                   <span>Tip: You can use inline speech tags like <code>[whispers]</code>, <code>[laughs]</code>, or <code>[excited]</code> in your text.</span>
                 </p>
               )}
+              {selectedModelId === 'mistralai/voxtral-mini-tts-3-0' && (
+                <p className="flex items-center gap-1.5 text-xs text-blue-600 bg-blue-50 p-2 rounded-lg">
+                  <Info className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span>Tip: You can use inline tags like <code>[pace=very-slow]</code>, <code>[emotion=amused]</code>, or <code>[sigh]</code> in your text.</span>
+                </p>
+              )}
             </div>
 
             {/* Model Selector Cards */}
             <div className="space-y-2">
               <label className="text-sm font-semibold text-gray-800">Speech Model</label>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {Object.entries(models).map(([key, m]) => {
                   const isSelected = selectedModelId === key;
                   const priceLabel =
