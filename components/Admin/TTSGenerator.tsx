@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import {
   fetchTTSModels,
   generateTTSAudio,
+  previewTTSVoice,
   estimateTTSCost,
   TTSModelMetadata,
   FALLBACK_MODELS,
@@ -67,6 +68,11 @@ export const TTSGenerator: React.FC<TTSGeneratorProps> = ({ onBack, onAudioGener
   const [playingId, setPlayingId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const [isPreviewingVoice, setIsPreviewingVoice] = useState<boolean>(false);
+  const [isPlayingPreview, setIsPlayingPreview] = useState<boolean>(false);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+  const previewCacheRef = useRef<Record<string, string>>({});
+
   const resolveAudioUrl = (url?: string | null): string => {
     if (!url) return '';
     if (url.startsWith('/')) {
@@ -114,6 +120,7 @@ export const TTSGenerator: React.FC<TTSGeneratorProps> = ({ onBack, onAudioGener
 
     return () => {
       isMounted = false;
+      previewAudioRef.current?.pause();
     };
   }, []);
 
@@ -213,12 +220,61 @@ export const TTSGenerator: React.FC<TTSGeneratorProps> = ({ onBack, onAudioGener
     }
   }, [availableVoices]);
 
+  // Stop any playing voice preview when voice or model changes
+  useEffect(() => {
+    if (previewAudioRef.current) {
+      previewAudioRef.current.pause();
+      setIsPlayingPreview(false);
+    }
+  }, [selectedModelId, voice]);
+
   // Update model instructions if switched
   const handleModelChange = (modelId: string) => {
     setSelectedModelId(modelId);
     const m = models[modelId];
     if (m?.defaultInstructions && !instructions) {
       setInstructions(m.defaultInstructions);
+    }
+  };
+
+  // Preview selected voice
+  const handlePreviewVoice = async () => {
+    if (!voice || isPreviewingVoice) return;
+
+    if (isPlayingPreview && previewAudioRef.current) {
+      previewAudioRef.current.pause();
+      setIsPlayingPreview(false);
+      return;
+    }
+
+    const activeLang = language === 'custom' ? customLanguage.trim() : language;
+    const cacheKey = `${selectedModelId}::${voice}::${activeLang || 'default'}`;
+
+    setError(null);
+    setIsPreviewingVoice(true);
+
+    try {
+      let url = previewCacheRef.current[cacheKey];
+      if (!url) {
+        url = await previewTTSVoice(selectedModelId, voice, activeLang || undefined);
+        previewCacheRef.current[cacheKey] = url;
+      }
+
+      if (!previewAudioRef.current) {
+        previewAudioRef.current = new Audio();
+        previewAudioRef.current.addEventListener('ended', () => setIsPlayingPreview(false));
+        previewAudioRef.current.addEventListener('pause', () => setIsPlayingPreview(false));
+      }
+
+      previewAudioRef.current.src = url;
+      await previewAudioRef.current.play();
+      setIsPlayingPreview(true);
+    } catch (err: any) {
+      console.error('Voice preview failed:', err);
+      setError(err.message || 'Failed to preview voice.');
+      setIsPlayingPreview(false);
+    } finally {
+      setIsPreviewingVoice(false);
     }
   };
 
@@ -534,23 +590,45 @@ export const TTSGenerator: React.FC<TTSGeneratorProps> = ({ onBack, onAudioGener
                 <label htmlFor="tts-voice" className="text-xs font-semibold text-gray-800">
                   Voice
                 </label>
-                <select
-                  id="tts-voice"
-                  value={voice}
-                  onChange={(e) => setVoice(e.target.value)}
-                  className="w-full rounded-xl border border-gray-200 p-2.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  required
-                >
-                  {availableVoices.length === 0 ? (
-                    <option value="">No voices for this language</option>
-                  ) : (
-                    availableVoices.map((v) => (
-                      <option key={v.id} value={v.id}>
-                        {v.name}
-                      </option>
-                    ))
-                  )}
-                </select>
+                <div className="flex items-center gap-2">
+                  <select
+                    id="tts-voice"
+                    value={voice}
+                    onChange={(e) => setVoice(e.target.value)}
+                    className="w-full rounded-xl border border-gray-200 p-2.5 text-xs bg-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    required
+                  >
+                    {availableVoices.length === 0 ? (
+                      <option value="">No voices for this language</option>
+                    ) : (
+                      availableVoices.map((v) => (
+                        <option key={v.id} value={v.id}>
+                          {v.name}
+                        </option>
+                      ))
+                    )}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={handlePreviewVoice}
+                    disabled={!voice || isPreviewingVoice}
+                    title={isPlayingPreview ? 'Stop voice preview' : 'Preview selected voice'}
+                    className={`inline-flex items-center gap-1.5 px-3 py-2.5 rounded-xl border text-xs font-semibold flex-shrink-0 transition ${
+                      isPlayingPreview
+                        ? 'border-purple-600 bg-purple-50 text-purple-700'
+                        : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-gray-300'
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  >
+                    {isPreviewingVoice ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-purple-600" />
+                    ) : isPlayingPreview ? (
+                      <Pause className="w-3.5 h-3.5 fill-current text-purple-600" />
+                    ) : (
+                      <Volume2 className="w-3.5 h-3.5 text-purple-600" />
+                    )}
+                    <span>{isPlayingPreview ? 'Stop' : 'Preview'}</span>
+                  </button>
+                </div>
               </div>
             </div>
 

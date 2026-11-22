@@ -4,7 +4,7 @@
   "version": "0.0.6",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node scripts/dev.mjs",
     "postinstall": "node scripts/copy-tinymce.js",
     "build": "npm run build:app && npm run build:wc",
     "build:app": "vite build",

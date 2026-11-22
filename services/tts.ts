@@ -336,21 +336,19 @@ export const FALLBACK_MODELS: Record<string, TTSModelMetadata> = {
     supportsInstructions: false,
     languages: VOXTRAL_LANGUAGES,
   },
-  'openai/gpt-4o-mini-tts-2025-12-15': {
-    id: 'openai/gpt-4o-mini-tts-2025-12-15',
-    name: 'OpenAI: GPT-4o Mini TTS',
+  'openai/gpt-audio-mini': {
+    id: 'openai/gpt-audio-mini',
+    name: 'OpenAI: GPT Audio Mini',
     description:
-      'Steerable OpenAI text-to-speech model supporting 57 languages, 13 built-in voices, and natural-language delivery instructions.',
-    pricing: { prompt: '0.0000006', completion: '0.000012', unit: 'token' },
+      'Cost-efficient OpenAI voice-native model supporting 57 languages, built-in voices, and natural-language delivery instructions.',
+    pricing: { prompt: '0.0000006', completion: '0.0000024', unit: 'token' },
     voices: [
       { id: 'alloy', name: 'Alloy' },
       { id: 'ash', name: 'Ash' },
       { id: 'ballad', name: 'Ballad' },
-      { id: 'cedar', name: 'Cedar' },
       { id: 'coral', name: 'Coral' },
       { id: 'echo', name: 'Echo' },
       { id: 'fable', name: 'Fable' },
-      { id: 'marin', name: 'Marin' },
       { id: 'nova', name: 'Nova' },
       { id: 'onyx', name: 'Onyx' },
       { id: 'sage', name: 'Sage' },
@@ -455,6 +453,39 @@ export const generateTTSAudio = async (
   }
 
   return data;
+};
+
+export const previewTTSVoice = async (
+  modelId: string,
+  voice: string,
+  language?: string
+): Promise<string> => {
+  const baseUrl = getBaseTjGenUrl();
+  const token = getAuthToken();
+
+  if (!token) {
+    throw new Error('You must be signed in as an administrator to preview voices.');
+  }
+
+  const params = new URLSearchParams({ modelId, voice });
+  if (language) {
+    params.set('language', language);
+  }
+
+  const res = await fetch(`${baseUrl}/api/tts/preview?${params.toString()}`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await res.json();
+
+  if (!res.ok || !data.success || !data.previewUrl) {
+    throw new Error(data.error || `Failed to load voice preview (${res.status})`);
+  }
+
+  return data.previewUrl.startsWith('/') ? `${baseUrl}${data.previewUrl}` : data.previewUrl;
 };
 
 export const estimateTTSCost = (
