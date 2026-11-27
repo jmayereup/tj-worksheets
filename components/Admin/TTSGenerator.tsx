@@ -33,11 +33,12 @@ import {
 interface TTSGeneratorProps {
   onBack: () => void;
   onAudioGenerated?: (r2Url: string | null, localUrl: string) => void;
+  isModal?: boolean;
 }
 
 const STORAGE_KEY = 'tts_history';
 
-export const TTSGenerator: React.FC<TTSGeneratorProps> = ({ onBack, onAudioGenerated }) => {
+export const TTSGenerator: React.FC<TTSGeneratorProps> = ({ onBack, onAudioGenerated, isModal = false }) => {
   const [models, setModels] = useState<Record<string, TTSModelMetadata>>(FALLBACK_MODELS);
   const [selectedModelId, setSelectedModelId] = useState<string>('hexgrad/kokoro-82m');
   const [text, setText] = useState<string>('');
@@ -407,31 +408,33 @@ export const TTSGenerator: React.FC<TTSGeneratorProps> = ({ onBack, onAudioGener
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className={isModal ? 'space-y-6' : 'max-w-6xl mx-auto space-y-6'}>
       {/* Top Bar */}
-      <div className="flex items-center justify-between bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
-        <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={onBack} className="items-center gap-2 text-sm">
-            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
-          </Button>
-          <div className="h-6 w-px bg-gray-200 hidden sm:block"></div>
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-purple-100 text-purple-700 rounded-xl">
-              <Mic className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-gray-900 leading-tight">TTS Audio Studio</h2>
-              <p className="text-xs text-gray-500">High-efficiency speech synthesis for worksheets</p>
+      {!isModal && (
+        <div className="flex items-center justify-between bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={onBack} className="items-center gap-2 text-sm">
+              <ArrowLeft className="w-4 h-4" /> Back to Dashboard
+            </Button>
+            <div className="h-6 w-px bg-gray-200 hidden sm:block"></div>
+            <div className="flex items-center gap-2.5">
+              <div className="p-2 bg-purple-100 text-purple-700 rounded-xl">
+                <Mic className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-gray-900 leading-tight">TTS Audio Studio</h2>
+                <p className="text-xs text-gray-500">High-efficiency speech synthesis for worksheets</p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full border border-green-200">
-            <Zap className="w-3.5 h-3.5" /> High-Efficiency VBR MP3
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 text-green-700 text-xs font-semibold rounded-full border border-green-200">
+              <Zap className="w-3.5 h-3.5" /> High-Efficiency VBR MP3
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Main Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -456,6 +459,7 @@ export const TTSGenerator: React.FC<TTSGeneratorProps> = ({ onBack, onAudioGener
               <textarea
                 id="tts-input-text"
                 rows={5}
+                autoFocus={isModal}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 placeholder="Type or paste the story, sentence, or vocabulary words you want to convert into speech..."

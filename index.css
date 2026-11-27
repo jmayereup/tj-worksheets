@@ -96,6 +96,22 @@ tj-chapter-book {
     width: 100%;
 }
 
+/* Native Modal Dialog Scroll Containment & Backdrop */
+dialog:modal {
+    overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+    overflow: hidden;
+    overscroll-behavior: contain;
+    background-color: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+dialog[open].tts-studio-dialog {
+    display: flex;
+}
+
 /* ==========================================================================
    Interactive Text Size Scaling System
    Overrides Tailwind v4 font-size and line-height variables on the container

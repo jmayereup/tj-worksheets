@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { LoginForm } from './LoginForm';
 import { LessonList } from './LessonList';
 import { LessonEditor } from './LessonEditorRefactored';
-import { TTSGenerator } from './TTSGenerator';
+import { TTSStudioModal } from './TTSStudioModal';
 import { isAdmin, triggerCloudflareRebuild } from '../../services/pocketbase';
 import { Button } from '../UI/Button';
 import { Modal } from '../UI/Modal';
-import { LayoutDashboard, ArrowLeft, Plus, RefreshCw, Rocket, Mic, List } from 'lucide-react';
+import { LayoutDashboard, ArrowLeft, Plus, RefreshCw, Rocket, Mic } from 'lucide-react';
 
 interface AdminDashboardProps {
     onBack: () => void;
@@ -16,12 +16,13 @@ interface AdminDashboardProps {
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack, onPreview, onLogout }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(isAdmin());
-    const [adminView, setAdminView] = useState<'list' | 'add' | 'edit' | 'tts'>('list');
+    const [adminView, setAdminView] = useState<'list' | 'add' | 'edit'>('list');
     const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
     const [editorInitData, setEditorInitData] = useState<any>(null);
     const [isRebuilding, setIsRebuilding] = useState(false);
     const [rebuildStatus, setRebuildStatus] = useState<string | null>(null);
     const [showRebuildPrompt, setShowRebuildPrompt] = useState(false);
+    const [showTTSModal, setShowTTSModal] = useState(false);
 
     const handleLoginSuccess = () => {
         setIsLoggedIn(true);
@@ -104,23 +105,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack, onPrevie
                 </div>
 
                 <div className="flex items-center gap-3">
-                    {adminView === 'tts' ? (
-                        <Button 
-                            variant="outline" 
-                            onClick={handleBackToList}
-                            className="items-center gap-2 text-sm"
-                        >
-                            <List className="w-4 h-4" /> Worksheets List
-                        </Button>
-                    ) : (
-                        <Button 
-                            variant="outline" 
-                            onClick={() => setAdminView('tts')}
-                            className="items-center gap-2 text-sm font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 border-purple-200"
-                        >
-                            <Mic className="w-4 h-4 text-purple-600" /> TTS Audio Studio
-                        </Button>
-                    )}
+                    <Button 
+                        variant="outline" 
+                        onClick={() => setShowTTSModal(true)}
+                        className="items-center gap-2 text-sm font-semibold text-purple-700 bg-purple-50 hover:bg-purple-100 border-purple-200"
+                    >
+                        <Mic className="w-4 h-4 text-purple-600" /> TTS Audio Studio
+                    </Button>
                     <Button 
                         variant="outline" 
                         onClick={handleManualRebuild} 
@@ -165,11 +156,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ onBack, onPrevie
                         onPreview={onPreview}
                     />
                 )}
-
-                {adminView === 'tts' && (
-                    <TTSGenerator onBack={handleBackToList} />
-                )}
             </main>
+
+            <TTSStudioModal
+                isOpen={showTTSModal}
+                onClose={() => setShowTTSModal(false)}
+            />
 
             <Modal
                 isOpen={showRebuildPrompt}
