@@ -80,23 +80,9 @@ export const useFocusedReaderScores = (
   const isVocabCompleted = useMemo(() => {
     if (!currentPart) return false;
     const vocabExplanations = currentPart.vocabulary_explanations || {};
-    const words = Object.keys(vocabExplanations);
-    const wordIndices = words.map((_, i) => i);
-    
-    // Replicate subsetting logic
-    const partLessonId = `${lessonId}-part-${currentPartIndex}`;
-    const allShuffledIndices = seededShuffle(wordIndices, `${partLessonId}-vocab-subset-seed`);
-    const subsetIndices = allShuffledIndices.slice(0, 5);
-    
-    if (subsetIndices.length === 0) return false;
-    
-    const vocabAnswers = answers.vocabulary || {};
-    let matchedCount = 0;
-    subsetIndices.forEach((index) => {
-      if (vocabAnswers[`vocab_${currentPartIndex}_${index}`]) matchedCount++;
-    });
-    return matchedCount === subsetIndices.length;
-  }, [currentPart, currentPartIndex, answers.vocabulary, lessonId]);
+    if (Object.keys(vocabExplanations).length === 0) return false;
+    return !!answers.completionStates?.[`vocab_${currentPartIndex}`];
+  }, [currentPart, currentPartIndex, answers.completionStates]);
 
   const comprehensionScore = useMemo(() => {
     if (!currentPart) return 0;

@@ -177,7 +177,7 @@ export const FocusedReaderView: React.FC<FocusedReaderViewProps> = ({
 
         {/* Vocabulary Section */}
         {currentPart.vocabulary_explanations && Object.keys(currentPart.vocabulary_explanations).length > 0 && (
-          <section className="animate-fade-in">
+          <section className="animate-fade-in" key={`vocab-${currentPartIndex}`}>
             <CollapsibleActivity
               isCompleted={isVocabCompleted}
               title={`Page ${currentPart.part_number} Vocabulary`}
@@ -227,7 +227,16 @@ export const FocusedReaderView: React.FC<FocusedReaderViewProps> = ({
                 ttsState={ttsState}
                 lessonId={`${lesson.id}-part-${currentPartIndex}`}
                 title={`Page ${currentPart.part_number} Vocabulary`}
-                savedIsChecked={isVocabCompleted}
+                savedIsChecked={!!answers.completionStates?.[`vocab_${currentPartIndex}`]}
+                onComplete={(checked) => {
+                  setAnswers(prev => ({
+                    ...prev,
+                    completionStates: {
+                      ...(prev.completionStates || {}),
+                      [`vocab_${currentPartIndex}`]: checked
+                    }
+                  }));
+                }}
                 hasActivityToggle={true}
                 limitToFive={true}
               />
